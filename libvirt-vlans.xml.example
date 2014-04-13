@@ -1,8 +1,3 @@
-# This goes into the domains
-<interface type='network'>
-  <source network='ovs-network' portgroup='vlan-02'/>
-</interface>
-
 # This is the libvirt network definition
 <network>
   <name>ovs-network</name>
@@ -32,3 +27,11 @@
 # Define and start the network
 virsh net-define libvirt-vlans.xml
 virsh net-start ovs-network
+
+# This goes into the domains
+<interface type='network'>
+  <source network='ovs-network' portgroup='vlan-02'/>
+</interface>
+
+# After starting domain check settings
+ovs-vsctl list port vnet1
