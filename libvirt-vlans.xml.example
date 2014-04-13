@@ -28,3 +28,7 @@
     </vlan>
   </portgroup>
 </network>
+
+# Define and start the network
+virsh net-define libvirt-vlans.xml
+virsh net-start ovs-network
