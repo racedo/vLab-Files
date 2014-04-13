@@ -31,6 +31,7 @@ virsh net-start ovs-network
 # This goes into the domains
 <interface type='network'>
   <source network='ovs-network' portgroup='vlan-02'/>
+  <model type='virtio'/>
 </interface>
 
 # After starting domain check settings
