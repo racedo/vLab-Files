@@ -5,6 +5,10 @@ ovs-vsctl add-br br-eth0
 # Consider setting MTU to 1546 to interface or reduce it to 1454 in the domains
 ovs-vsctl add-port br-eth0 eth0 && service network restart
 
-# Create internal ovs bridge and set GRE tunnel endpoint
+# Create internal ovs bridge and set GRE tunnel endpoints
 ovs-vsctl add-br br-int0
 ovs-vsctl add-port br-int0 gre0 -- set interface gre0 type=gre options:remote_ip=192.168.2.1
+ovs-vsctl add-port br-int0 gre1 -- set interface gre1 type=gre options:remote_ip=192.168.2.3
+
+# Enable STP (needed for more than 2 hosts)
+ovs-vsctl set bridge br-int0 stp_enable=true
