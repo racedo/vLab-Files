@@ -1,17 +1,25 @@
 # If using directly a Open vSwitch bridge add this to the domain:
 #
-# <interface type='bridge'>
-#    <source bridge='br-int0'/>
-#    <virtualport type='openvswitch' />
-#    <model type='virtio'/>
-# </interface>
+#     <interface type='bridge'>
+#        <source bridge='br-int0'/>
+#        <virtualport type='openvswitch' />
+#        <model type='virtio'/>
+#     </interface>
 # 
-# If using a Open vSwitch network previously defined with virsh add this to the domain:
+# If using a Open vSwitch network previously defined with virsh add this to the domain (example with 3 networks):
 #
-# <interface type='network'>
-#    <source network='ovs-network' portgroup='vlan-02'/>
-#    <model type='virtio'/>
-# </interface>
+#    <interface type='network'>
+#      <source network='ovs-network' portgroup='no-vlan'/>
+#      <model type='virtio'/>
+#    </interface>
+#    <interface type='network'>
+#      <source network='ovs-network' portgroup='vlan-100'/>
+#      <model type='virtio'/>
+#    </interface>
+#    <interface type='network'>
+#      <source network='ovs-network' portgroup='vlan-200'/>
+#      <model type='virtio'/>
+#    </interface>
 
 virt-install \
 --name foreman \
