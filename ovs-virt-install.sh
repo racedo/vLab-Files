@@ -7,6 +7,7 @@
 # </interface>
 # 
 # If using a Open vSwitch network previously defined with virsh add this to the domain:
+#
 # <interface type='network'>
 #    <source network='ovs-network' portgroup='vlan-02'/>
 #    <model type='virtio'/>
