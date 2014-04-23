@@ -1,8 +1,15 @@
-# Change after creation to openvswitch with virsh edit
+# If using directly a Open vSwitch bridge add this to the domain:
+#
 # <interface type='bridge'>
-#   <source bridge='br-int0'/>
-#   <virtualport type='openvswitch' />
-#   <model type='virtio'/>
+#    <source bridge='br-int0'/>
+#    <virtualport type='openvswitch' />
+#    <model type='virtio'/>
+# </interface>
+# 
+# If using a Open vSwitch network previously defined with virsh add this to the domain:
+# <interface type='network'>
+#    <source network='ovs-network' portgroup='vlan-02'/>
+#    <model type='virtio'/>
 # </interface>
 
 virt-install \
