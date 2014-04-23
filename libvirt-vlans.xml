@@ -3,6 +3,8 @@
   <forward mode='bridge'/>
   <bridge name='br-int0'/>
   <virtualport type='openvswitch'/>
+  <portgroup name='no-vlan' default='yes'>
+  </portgroup>
   <portgroup name='vlan-100'>
     <vlan>
       <tag id='100'/>
