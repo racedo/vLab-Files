@@ -19,6 +19,6 @@ virt-install \
 --vcpus=1 \
 --disk path=/home/VMs/foreman.img,size=20 \
 --nonetworks \
---cdrom /home/VMs/rhel-server-6.5-x86_64-dvd.iso \
+--cdrom /home/VMs/ISOs/rhel-server-6.5-x86_64-dvd.iso \
 --graphics vnc,listen=0.0.0.0,keymap=en-uk --noautoconsole --hvm \
 --os-variant rhel6
