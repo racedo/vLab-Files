@@ -20,12 +20,14 @@
 #      <source network='ovs-network' portgroup='vlan-200'/>
 #      <model type='virtio'/>
 #    </interface>
+#
+# Create a pool to be able to use qcow2: virsh pool-define-as --name VMs-pool --type dir --target /home/VMs/pool/
 
 virt-install \
 --name foreman \
 --ram 1024 \
 --vcpus=1 \
---disk path=/home/VMs/foreman.img,size=20 \
+--disk size=20,format=qcow2,pool=VMs-pool \
 --nonetworks \
 --cdrom /home/VMs/ISOs/rhel-server-6.5-x86_64-dvd.iso \
 --graphics vnc,listen=0.0.0.0,keymap=en_gb --noautoconsole --hvm \
