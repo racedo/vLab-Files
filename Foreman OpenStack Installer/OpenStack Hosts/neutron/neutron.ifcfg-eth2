@@ -1,0 +1,6 @@
+# The uplink interface used by Open vSwitch with br-ex needs to be up
+DEVICE="eth2"
+BOOTPROTO="none"
+ONBOOT="yes"
+TYPE="Ethernet"
+MTU=1456

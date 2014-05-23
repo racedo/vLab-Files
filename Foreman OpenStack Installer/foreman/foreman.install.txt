@@ -1,0 +1,28 @@
+RDO (CentOS 6.5)
+================
+yum install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+yum install http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/rdo-release-icehouse-3.noarch.rpm
+
+#### Only if using foreman 1.5 ####
+yum install centos-release-SCL 
+yum install scl-utils
+#### Only if using foreman 1.5 ####
+
+RHEL OSP 6.5
+============
+
+# If using Subscription Manager:
+
+subscription-manager register
+subscription-manager repos --enable=rhel-6-server-openstack-4.0-rpms
+
+# If using RHN Classic:
+
+rhn_register
+rhn-channel --add --channel=rhel-x86_64-server-6-rhscl-1
+rhn-channel --add --channel=rhel-x86_64-server-6-ost-4
+
+Install Foreman
+===============
+yum update -y
+yum install openstack-foreman-installer dhcp foreman-selinux foreman-sqlite
