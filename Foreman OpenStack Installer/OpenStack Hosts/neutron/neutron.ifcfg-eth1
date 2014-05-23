@@ -1,0 +1,9 @@
+# Puppet will fail with "Could not retrieve catalog from remote server: Error 400 on SERVER: Local ip for ovs agent must be set when tunneling is enabled at /usr/share/packstack/modules/neutron/manifests/agents/ovs.pp:30 on node neutron-1.linux-labs.net"
+# When the device is set the problem is fixed
+DEVICE="eth1"
+BOOTPROTO="none"
+ONBOOT="yes"
+TYPE="Ethernet"
+IPADDR0=10.1.1.1
+PREFIX0=24
+MTU=1456

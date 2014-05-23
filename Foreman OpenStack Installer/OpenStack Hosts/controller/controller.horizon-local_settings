@@ -1,0 +1,4 @@
+# Include the private network as puppet only will add here the public one:
+# Edit /etc/openstack-dashboard/local_settings to include it in ALLOWED_HOSTS https://bugzilla.redhat.com/show_bug.cgi?id=1028678
+
+ALLOWED_HOSTS = ['172.16.1.1', 'controller-1.linux-labs.net', 'controller-1', 'localhost', '172.16.0.1' ]

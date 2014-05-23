@@ -1,0 +1,13 @@
+glance image-create \ 
+--name 'CentOS 6.5' \
+--disk-format qcow2 \
+--container-format bare \
+--is-public true \
+--copy-from http://repos.fedorapeople.org/repos/openstack/guest-images/centos-6.5-20140117.0.x86_64.qcow2
+
+glance image-create \ 
+--name 'Ubuntu Trusty' \
+--disk-format qcow2 \
+--container-format bare \
+--is-public true \
+--copy-from http://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-disk1.img

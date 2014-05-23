@@ -1,0 +1,9 @@
+# This is where the local_ip is picked from, needs to be set previously
+ovs_tunnel_iface: eth1
+
+ovs_tunnel_types: ["gre"]
+ovs_bridge_mappings: ["physext:br-ex"]
+ovs_vlan_ranges: pyhsext
+controller_pub_host: 192.168.5.10
+
+

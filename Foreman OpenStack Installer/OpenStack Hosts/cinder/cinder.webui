@@ -1,0 +1,18 @@
+# Create in More > Provisioning > Partition Tables based on this doc: https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_Linux/6/html/Installation_Guide/s1-kickstart2-options.html
+
+zerombr
+clearpart --all --initlabel
+part /boot --fstype ext4 --size=150
+part swap --recommended
+part pv.01 --size=5120
+part pv.02 --size=1 --grow
+volgroup vg_root pv.01
+logvol  /  --fstype=ext4 --vgname=vg_root  --name=lv_root --size=1 --grow --percent=100
+volgroup cinder-volumes pv.02
+
+# Because of https://bugzilla.redhat.com/show_bug.cgi?id=990828 VG needs to be renamed from cindervolume to cinder-volume. It seems I cannot change the name in the puppet manifest from Foreman
+vgrename cindervolumes cinder-volumes
+
+# Then Operating System "Red Hat"
+#
+# Then Edit Operating System and check the new disk layout

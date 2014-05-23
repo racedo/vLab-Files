@@ -1,0 +1,10 @@
+DEVICE=eth0
+ONBOOT=yes
+TYPE=Ethernet
+BOOTPROTO=none
+IPADDR0=192.168.5.1
+PREFIX0=24
+# Change to 192.168.5.1 after foreman is installed
+DNS1=192.168.5.100
+GATEWAY=192.168.5.100
+MTU=1454
