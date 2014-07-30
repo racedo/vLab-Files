@@ -1,6 +1,6 @@
 neutron net-create public --router:external=True
 neutron help subnet-create
-neutron subnet-create public --allocation-pool start=192.168.5.200,end=192.168.5.250 192.168.5.0/24
+neutron subnet-create public --disable-dhcp --allocation-pool start=192.168.5.200,end=192.168.5.250 192.168.5.0/24
 neutron net-list -- --router:external=True
 neutron net-create net1
 neutron subnet-create net1 10.0.0.0/24
