@@ -1,5 +1,5 @@
-# mount -o loop ISOs/rhel-server-6.5-x86_64-dvd.iso /tmp/rhel/
-# ls /tmp/rhel/
+mount -o loop ISOs/rhel-server-6.5-x86_64-dvd.iso /tmp/rhel/
+ls /tmp/rhel/
 EFI      EULA_pt           README                    RELEASE-NOTES-it-IT.html  RELEASE-NOTES-ru-RU.html  RPM-GPG-KEY-redhat-release
 EULA     EULA_zh           RELEASE-NOTES-as-IN.html  RELEASE-NOTES-ja-JP.html  RELEASE-NOTES-si-LK.html  ScalableFileSystem
 EULA_de  GPL               RELEASE-NOTES-bn-IN.html  RELEASE-NOTES-kn-IN.html  RELEASE-NOTES-ta-IN.html  Server
@@ -10,9 +10,11 @@ EULA_it  LoadBalancer      RELEASE-NOTES-fr-FR.html  RELEASE-NOTES-or-IN.html  r
 EULA_ja  media.repo        RELEASE-NOTES-gu-IN.html  RELEASE-NOTES-pa-IN.html  ResilientStorage
 EULA_ko  Packages          RELEASE-NOTES-hi-IN.html  RELEASE-NOTES-pt-BR.html  RPM-GPG-KEY-redhat-beta
 
-# cp -a /tmp/rhel/* media/rhel/6.5/os/x86_64/
+cp -a /tmp/rhel/* media/rhel/6.5/os/x86_64/
 
-# cat /etc/httpd/conf.d/pxe-foreman.conf
+# If it can run on port 80
+
+cat /etc/httpd/conf.d/pxe-foreman.conf
 Alias /rhel/6.5/os/x86_64 /home/VMs/media/rhel/6.5/os/x86_64/
 
 <Directory /home/VMs/media/rhel/6.5/os/x86_64>
@@ -21,3 +23,33 @@ Alias /rhel/6.5/os/x86_64 /home/VMs/media/rhel/6.5/os/x86_64/
  Deny from all
  Allow from 127.0.0.1 192.168.1.0/16
 </Directory>
+
+# If a different port needed (example with repos and media):
+
+listen 81
+<VirtualHost *:81>
+    DocumentRoot "/var/www/html"
+    <Directory "/var/www/html">
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        #Order Allow,Deny
+        #Allow from all
+    </Directory>
+
+    Alias /released/RHEL-7/7.0/Server/x86_64/os/ /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/
+
+    <Directory /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/>
+     Options Indexes FollowSymLinks
+     Order Deny,Allow
+     Deny from all
+     Allow from 127.0.0.1 192.168.1.0/16 10.0.0.0/16
+   </Directory>
+</VirtualHost>
+
+# Enable selinux context:
+
+semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?"
+
+# If /var/www/html is a NFS share:
+
+setsebool -P httpd_use_nfs on
