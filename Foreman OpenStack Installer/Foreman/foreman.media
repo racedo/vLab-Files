@@ -46,6 +46,11 @@ listen 81
    </Directory>
 </VirtualHost>
 
+# Make sure port is included in selinux
+
+semanage port -l | grep -w http_port_t
+http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000
+
 # Enable selinux context:
 
 semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?"
