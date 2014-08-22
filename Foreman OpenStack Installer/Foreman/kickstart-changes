@@ -18,3 +18,11 @@ network --onboot yes --device "<%= @host.params['storage_ip_int'] %>" --bootprot
 <% if @host.params['pub_ip_int'] -%>
 network --onboot yes --device "<%= @host.params['pub_ip_int'] %>" --bootproto static --ip "<%= @host.params['pub_ip'] %>" --netmask="<%= @host.params['pub_ip_netmask'] %>"  --gateway="<%= @host.params['pub_ip_gateway'] %>" --noipv6
 <% end -%>
+
+# Changing bios dev name for eth:
+
+bootloader --location=mbr --append="nofb quiet splash=quiet biosdevname=0 net.ifnames=0" <%= grub_pass %>
+
+# Partition table with 2 disks for cinder
+
+part pv.02 --size=1024 --grow --ondisk=sdb
