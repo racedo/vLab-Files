@@ -1,0 +1,20 @@
+# Staypuft, using multiple networks with kickstart
+
+
+# Mgmt / Provisioning Network
+network --bootproto <%= @static ? "static --ip=#{@host.ip} --netmask=#{@host.subnet.mask} --gateway=#{@host.subnet.gateway} --nameserver=#{[@host.subnet.dns_primary, @host.subnet.dns_secondary].reject { |n| n.blank? }.join(',')}" : 'dhcp' %> --hostname <%= @host %>
+
+# Data Network
+<% if @host.params['data_ip_int'] -%>
+network --onboot yes --device "<%= @host.params['data_ip_int'] %>" --bootproto static --ip "<%= @host.params['data_ip'] %>" --netmask="<%= @host.params['data_ip_netmask'] %>" —noipv6 —nodefroute
+<% end -%>
+
+# Storage Network
+<% if @host.params['storage_ip_int'] -%>
+network --onboot yes --device "<%= @host.params['storage_ip_int'] %>" --bootproto static --ip "<%= @host.params['storage_ip'] %>" --netmask="<%= @host.params['storage_ip_netmask'] %>" —noipv6 —nodefroute
+<% end -%>
+
+# Public Network
+<% if @host.params['pub_ip_int'] -%>
+network --onboot yes --device "<%= @host.params['pub_ip_int'] %>" --bootproto static --ip "<%= @host.params['pub_ip'] %>" --netmask="<%= @host.params['pub_ip_netmask'] %>"  --gateway="<%= @host.params['pub_ip_gateway'] %>" --noipv6
+<% end -%>
