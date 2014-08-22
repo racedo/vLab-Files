@@ -23,6 +23,38 @@ network --onboot yes --device "<%= @host.params['pub_ip_int'] %>" --bootproto st
 
 bootloader --location=mbr --append="nofb quiet splash=quiet biosdevname=0 net.ifnames=0" <%= grub_pass %>
 
+# Replace CDN by local repos. Replace this line:
+
+<%= snippets "redhat_register" %>
+
+
+# By this:
+cat << EOF >> /etc/yum.repos.d/foreman.repo
+[rhel-7-server-openstack-5.0-rpms]
+name=rhel-7-server-openstack-5.0
+baseurl=http://10.0.0.129:81/repos/rhel-7-server-openstack-5.0-rpms
+gpgcheck=0
+enabled=1
+
+[rhel-7-server-rpms]
+name=rhel-7-server-rpms
+baseurl=http://10.0.0.129:81/repos/rhel-7-server-rpms
+gpgcheck=0
+enabled=1
+
+[rhel-7-server-rh-common-rpms]
+name=rhel-7-common
+baseurl=http://10.0.0.129:81/repos/rhel-7-server-rh-common-rpms
+gpgcheck=0
+enabled=1
+
+[rhel-server-rhscl-7-rpms]
+name=rhel-server-rhscl-7-rpms
+baseurl=http://10.0.0.129:81/repos/rhel-server-rhscl-7-rpms
+gpgcheck=0
+enabled=1
+EOF
+
 # Partition table with 2 disks for cinder
 
 part pv.02 --size=1024 --grow --ondisk=sdb
