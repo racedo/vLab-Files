@@ -1,4 +1,4 @@
-# Staypuft, using multiple networks with kickstart
+# Staypuft, using multiple networks with kickstart. In the ""Kickstart RHEL Default":
 
 
 # Mgmt / Provisioning Network
@@ -19,11 +19,18 @@ network --onboot yes --device "<%= @host.params['storage_ip_int'] %>" --bootprot
 network --onboot yes --device "<%= @host.params['pub_ip_int'] %>" --bootproto static --ip "<%= @host.params['pub_ip'] %>" --netmask="<%= @host.params['pub_ip_netmask'] %>"  --gateway="<%= @host.params['pub_ip_gateway'] %>" --noipv6
 <% end -%>
 
-# Changing bios dev name for eth:
+# Disabling Consistent Network Device Naming needs changes in two templates:
+
+# In the "Kickstart RHEL Default":
 
 bootloader --location=mbr --append="nofb quiet splash=quiet biosdevname=0 net.ifnames=0" <%= grub_pass %>
 
-# Replace CDN by local repos. Replace this line:
+# And in the Kickstart default PXELinux:
+
+<% elsif @host.operatingsystem.name != 'Fedora' and @host.operatingsystem.major.to_i >= 7 -%>
+append initrd=<%= @initrd %> ks=<%= foreman_url('provision')%> network ks.sendmac biosdevname=0 net.ifnames=0
+
+# Replace CDN by local repos. Replace this line in the "Kickstart RHEL Default" template:
 
 <%= snippets "redhat_register" %>
 
@@ -55,6 +62,6 @@ gpgcheck=0
 enabled=1
 EOF
 
-# Partition table with 2 disks for cinder
+# Partition table with 2 disks for cinder. Make sure this line in the Partition Table "LVM with cinder-volumes" has sdb instead of sda
 
 part pv.02 --size=1024 --grow --ondisk=sdb
