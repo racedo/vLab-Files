@@ -1,5 +1,5 @@
 # Staypuft, using multiple networks with kickstart. In the ""Kickstart RHEL Default":
-
+# (goes on the %post)
 
 # Mgmt / Provisioning Network
 network --bootproto <%= @static ? "static --ip=#{@host.ip} --netmask=#{@host.subnet.mask} --gateway=#{@host.subnet.gateway} --nameserver=#{[@host.subnet.dns_primary, @host.subnet.dns_secondary].reject { |n| n.blank? }.join(',')}" : 'dhcp' %> --hostname <%= @host %>
@@ -17,6 +17,15 @@ network --onboot yes --device "<%= @host.params['storage_ip_int'] %>" --bootprot
 # Public Network
 <% if @host.params['pub_ip_int'] -%>
 network --onboot yes --device "<%= @host.params['pub_ip_int'] %>" --bootproto static --ip "<%= @host.params['pub_ip'] %>" --netmask="<%= @host.params['pub_ip_netmask'] %>"  --gateway="<%= @host.params['pub_ip_gateway'] %>" --noipv6
+<% end -%>
+
+# Mounting NFS for live migration (goes on the %post)
+
+<% if @host.params['live_migration_nfs_mount'] -%>
+echo "Mounting NFS share (TEST RAMON)"
+mkdir -p /var/lib/nova/instances
+mount "<%= @host.params['live_migration_nfs_mount'] %>" /var/lib/nova/instances
+echo "<%= @host.params['live_migration_nfs_mount'] %>" /var/lib/nova/instances defaults 0 0" >> /etc/fstab
 <% end -%>
 
 # Disabling Consistent Network Device Naming needs changes in two templates:
