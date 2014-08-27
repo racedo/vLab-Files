@@ -24,9 +24,10 @@ network --onboot yes --device "<%= @host.params['pub_ip_int'] %>" --bootproto st
 
 <% if @host.params['live_migration_nfs_mount'] -%>
 echo "Mounting NFS share (TEST RAMON)"
+yum -t -y -e 0 install nfs-utils
 mkdir -p /mnt/sysimage/var/lib/nova/instances
-mount "<%= @host.params['live_migration_nfs_mount'] %>" /var/lib/nova/instances
-echo "<%= @host.params['live_migration_nfs_mount'] %>" /var/lib/nova/instances defaults 0 0" >> /etc/fstab
+# mount "<%= @host.params['live_migration_nfs_mount'] %>" /mnt/sysimage/var/lib/nova/instances
+echo "<%= @host.params['live_migration_nfs_mount'] %> /var/lib/nova/instances nfs defaults 0 0" >> /etc/fstab
 <% end -%>
 
 # Disabling Consistent Network Device Naming needs changes in two templates:
