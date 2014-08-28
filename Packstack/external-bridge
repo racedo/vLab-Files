@@ -1,0 +1,16 @@
+# Assuming eth2 is the external interface used with br-ex:
+
+/etc/sysconfig/network-scripts/ifcfg-eth2
+
+DEVICE=eth2
+TYPE=OVSPort
+DEVICETYPE=ovs
+OVS_BRIDGE=br-ex
+ONBOOT=yes
+
+/etc/sysconfig/network-scripts/ifcfg-br-ex
+
+DEVICE=br-ex
+DEVICETYPE=ovs
+TYPE=OVSBridge
+ONBOOT=yes
