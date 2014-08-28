@@ -1,0 +1,3 @@
+# Make a container public:
+
+swift post --read-acl='.r:*,.rlistings' heat_templates
