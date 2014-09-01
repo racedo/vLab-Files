@@ -1,0 +1,61 @@
+Tested with Red Hat IdM (FreeIPA)
+
+1. Add the service accounts in the IPA host. Use "changeme" as the password as it has to be changed after "first login":
+
+ipa user-add glance --cn=glance --first=glance --last=service
+ipa passwd glance
+ipa user-add ceilometer --cn=ceilometer --first=ceilometer --last=service
+ipa passwd ceilometer
+ipa user-add cinder --cn=cinder --first=cinder --last=service
+ipa passwd cinder
+ipa user-add heat --cn=heat --first=heat --last=service
+ipa passwd heat
+ipa user-add neutron --cn=neutron --first=neutron --last=service
+ipa passwd neutron
+ipa user-add nova --cn=nova --first=nova --last=service
+ipa passwd nova
+ipa user-add swift --cn=swift --first=swift --last=service
+
+3. Initiate a session with each service user from a host configured to authenticate to the IPA host:
+
+kinit swift
+Password for swift@JENTRENA.USERSYS.REDHAT.COM:
+Password expired.  You must change it now.
+Enter new password:
+Enter it again:
+
+Note: The passwords can be found in the /etc/$SERVICE_NAME for each service
+
+4. Create another user in the IPA host and add the role admin for the admin tenant:
+
+In the IPA host:
+
+ipa user-add ospadmin --cn=ospadmin --first=Admin --last=OSPAdmin
+ipa passwd ospadmin
+
+Then run kinit to change the password: 
+
+kinit ospadmin
+
+5. Change keystone.conf in the controller host:
+
+[assignment]
+driver = keystone.assignment.backends.sql.Assignment
+
+[ldap]
+url = ldap://10.33.20.185
+user_tree_dn=cn=users,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
+user_id_attribute=uid
+group_tree_dn=cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
+
+# Restart the service:
+systemctl restart openstack-keystone
+
+FIXME: At some point I had to use the service token directly:
+
+export OS_SERVICE_ENDPOINT=http://127.0.0.1:35357/v2.0
+export OS_SERVICE_TOKEN="token_from_keystone_conf"
+
+FIXME: I think I did this after restarting openstack-keystone with the LDAP config but needs double-checking
+
+keystone user-role-add --user-id ospadmin --tenant-id "ID of the admin tenant" --role-id "ID of the admin role"
