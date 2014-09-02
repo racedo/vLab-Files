@@ -48,14 +48,22 @@ user_tree_dn=cn=users,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
 user_id_attribute=uid
 group_tree_dn=cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
 
-# Restart the service:
+6. Restart the service:
+
 systemctl restart openstack-keystone
 
-FIXME: At some point I had to use the service token directly:
+7. Load the service token
 
 export OS_SERVICE_ENDPOINT=http://127.0.0.1:35357/v2.0
 export OS_SERVICE_TOKEN="token_from_keystone_conf"
 
-FIXME: I think I did this after restarting openstack-keystone with the LDAP config but needs double-checking
+8. Add the users with their roles to the tenants:
 
 keystone user-role-add --user-id ospadmin --tenant-id "ID of the admin tenant" --role-id "ID of the admin role"
+
+Bonus trick. This script will list all the roles per tenant for a given user:
+
+#!/bin/bash  
+for tenant in `keystone tenant-list | grep -v "-" | grep -v "id" | awk '{print $4}'`;  
+  do keystone user-role-list --user $1 --tenant $tenant;  
+done
