@@ -16,7 +16,7 @@ ipa user-add nova --cn=nova --first=nova --last=service
 ipa passwd nova
 ipa user-add swift --cn=swift --first=swift --last=service
 
-3. Initiate a session with each service user from a host configured to authenticate to the IPA host:
+2. Initiate a session with each service user from a host configured to authenticate to the IPA host:
 
 kinit swift
 Password for swift@JENTRENA.USERSYS.REDHAT.COM:
@@ -26,7 +26,7 @@ Enter it again:
 
 Note: The passwords can be found in the /etc/$SERVICE_NAME for each service
 
-4. Create another user in the IPA host and add the role admin for the admin tenant:
+3. Create another user in the IPA host and add the role admin for the admin tenant:
 
 In the IPA host:
 
@@ -37,12 +37,12 @@ Then run kinit to change the password:
 
 kinit ospadmin
 
-5. Create a group called "enabled_users" in IPA and add all the OpenStack users, including the service users:
+4. Create a group called "enabled_users" in IPA and add all the OpenStack users, including the service users:
 
 ipa group-add --nonposix --desc='OpenStack user_enabled emulation for Keystone' enabled_users
 ipa group-add-member --user=ospadmin,ceilometer,heat,glance,admin,nova,cinder,neutron,heat_admin,swift,demo enabled_users
 
-6. Change keystone.conf in the controller host:
+5. Change keystone.conf in the controller host:
 
 [assignment]
 driver = keystone.assignment.backends.sql.Assignment
@@ -57,20 +57,44 @@ user_id_attribute=uid
 user_enabled_emulation = True
 user_enabled_emulation_dn = cn=enabled_users,cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
 
-7. Restart the service:
+6. Restart the service:
 
 systemctl restart openstack-keystone
 
-8. Load the service token
+7. Load the service token
 
 export OS_SERVICE_ENDPOINT=http://127.0.0.1:35357/v2.0
 export OS_SERVICE_TOKEN="token_from_keystone_conf"
 
-9. Add the users with their roles to the tenants:
+8. Add the users with their roles to the tenants:
 
 keystone user-role-add --user-id ospadmin --tenant-id "ID of the admin tenant" --role-id "ID of the admin role"
 
-Bonus trick. This script will list all the roles per tenant for a given user:
+9. Confirm it works
+ 
+First, load the environment with the ospadmin user. Then:
+ 
+# keystone user-list  
++------------+------------+---------+-------+  
+|     id     |    name    | enabled | email |  
++------------+------------+---------+-------+  
+| ceilometer | ceilometer |   True  |       |  
+|   cinder   |   cinder   |   True  |       |  
+|   glance   |   glance   |   True  |       |  
+|    heat    |    heat    |   True  |       |  
+|  neutron   |  neutron   |   True  |       |  
+|    nova    |    nova    |   True  |       |  
+|  ospadmin  |  ospadmin  |   True  |       |  
+|   ramon    |   ramon    |  False  |       |  
+|   swift    |   swift    |   True  |       |  
+|   user1    |   user1    |  False  |       |  
+|   user2    |   user2    |  False  |       |  
+|   user3    |   user3    |  False  |       |  
+|   user4    |   user4    |  False  |       |  
++------------+------------+---------+-------+  
+
+
+10. Bonus trick. This script will list all the roles per tenant for a given user:
 
 #!/bin/bash  
 for tenant in `keystone tenant-list | grep -v "-" | grep -v "id" | awk '{print $4}'`;  
