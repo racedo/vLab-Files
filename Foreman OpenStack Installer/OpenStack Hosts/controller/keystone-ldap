@@ -40,7 +40,7 @@ kinit ospadmin
 5. Create a group called "enabled_users" in IPA and add all the OpenStack users, including the service users:
 
 ipa group-add --nonposix --desc='OpenStack user_enabled emulation for Keystone' enabled_users
-ipa group-add-member --user=ceilometer,heat,glance,admin,nova,cinder,neutron,heat_admin,swift,demo enabled_users
+ipa group-add-member --user=ospadmin,ceilometer,heat,glance,admin,nova,cinder,neutron,heat_admin,swift,demo enabled_users
 
 6. Change keystone.conf in the controller host:
 
