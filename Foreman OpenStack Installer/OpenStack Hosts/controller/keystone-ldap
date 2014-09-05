@@ -37,7 +37,12 @@ Then run kinit to change the password:
 
 kinit ospadmin
 
-5. Change keystone.conf in the controller host:
+5. Create a group called "enabled_users" in IPA and add all the OpenStack users, including the service users:
+
+ipa group-add --nonposix --desc='OpenStack user_enabled emulation for Keystone' enabled_users
+ipa group-add-member --user=ceilometer,heat,glance,admin,nova,cinder,neutron,heat_admin,swift,demo enabled_users
+
+6. Change keystone.conf in the controller host:
 
 [assignment]
 driver = keystone.assignment.backends.sql.Assignment
@@ -45,8 +50,12 @@ driver = keystone.assignment.backends.sql.Assignment
 [ldap]
 url = ldap://10.33.20.185
 user_tree_dn=cn=users,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
-user_id_attribute=uid
 group_tree_dn=cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
+
+user_id_attribute=uid
+
+user_enabled_emulation = True
+user_enabled_emulation_dn = cn=enabled_users,cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
 
 6. Restart the service:
 
