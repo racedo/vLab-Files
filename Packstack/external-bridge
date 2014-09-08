@@ -1,8 +1,8 @@
 # Assuming eth2 is the external interface used with br-ex:
 
-/etc/sysconfig/network-scripts/ifcfg-eth2
+/etc/sysconfig/network-scripts/ifcfg-eth0
 
-DEVICE=eth2
+DEVICE=eth0
 TYPE=OVSPort
 DEVICETYPE=ovs
 OVS_BRIDGE=br-ex
@@ -14,3 +14,13 @@ DEVICE=br-ex
 DEVICETYPE=ovs
 TYPE=OVSBridge
 ONBOOT=yes
+
+# If we need DHCP in it:
+
+OVSBOOTPROTO=dhcp
+OVSDHCPINTERFACES=eth0
+
+# If we need br-ex to have a persistent MAC address:
+
+MACADDR=fd:16:e4:3f:21:4e
+OVS_EXTRA="set bridge br-ex other-config:hwaddr=$MACADDR"
