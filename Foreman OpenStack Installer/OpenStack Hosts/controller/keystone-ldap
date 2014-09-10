@@ -18,6 +18,8 @@ ipa user-add swift --cn=swift --first=swift --last=service
 
 2. Initiate a session with each service user from a host configured to authenticate to the IPA host:
 
+Note: Install sssd first if needed (yum install sssd)
+
 kinit swift
 Password for swift@JENTRENA.USERSYS.REDHAT.COM:
 Password expired.  You must change it now.
