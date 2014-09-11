@@ -46,6 +46,9 @@ ipa group-add-member --user=ospadmin,ceilometer,heat,glance,admin,nova,cinder,ne
 
 5. Change keystone.conf in the controller host:
 
+[identity]
+driver=keystone.identity.backends.ldap.Identity
+
 [assignment]
 driver = keystone.assignment.backends.sql.Assignment
 
