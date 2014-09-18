@@ -1,0 +1,124 @@
+Notes on CDN channels:
+======================
+
+Register machines to all the relevant repos:
+--------------------------------------------
+
+subscription-manager register --auto-attach
+subscription-manager repos --disable=*
+subscription-manager repos --enable=rhel-6-server-rpms --enable=rhel-6-server-rh-common-rpms --enable=rhel-6-server-openstack-4.0-rpms --enable=rhel-lb-for-rhel-6-server-rpms --enable=rhel-6-server-optional-rpms rhel-6-server-mrg-messaging-2-rpms
+
+Install facter from RH-COMMON:
+------------------------------
+
+yum install facter
+subscription-manager repos --disable=rhel-6-server-rh-common-rpms
+
+Please, see notes below about disabling RH-COMMON after installing facter from it.
+
+Check python-qpid version is 0.19 in all the hosts:
+---------------------------------------------------
+yum -q list python-qpid
+
+Please, see notes below for details.
+
+
+1. Errors when setting CONFIG_NEUTRON_OVS_TUNNEL_IF to a VLAN interface in RHEL OSP 4 (Patch): 
+==============================================================================================
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1143906
+
+NOTE: 
+-----
+
+We are setting up a Linux Bridge called br801 and using the eth6.801 in the compute hosts as a port. We are doing the same in the Neutron node. This is due to a limitation where Packstack can't configure different network interface names for the GRE tunnel in different hosts (answer file setting CONFIG_NEUTRON_OVS_TUNNEL_IF).
+
+Because of the above, the following patch is optional.
+
+Apply this manually in the controller node (where packstack is run from) to fix it:
+
+File: /usr/lib/python2.6/site-packages/packstack/puppet/templates/neutron_ovs_agent_gre.pp
+
+After "if "%(CONFIG_NEUTRON_OVS_TUNNEL_IF)s" {"
+
+replace:
+
+  $localip = $ipaddress_%(CONFIG_NEUTRON_OVS_TUNNEL_IF)s
+
+by:
+
+  $iface = regsubst('%(CONFIG_NEUTRON_OVS_TUNNEL_IF)s', '[\.\-\:]', '_', 'G')
+  $localip = inline_template("<%%= scope.lookupvar('::ipaddress_${iface}') %%>")
+
+
+2. Don't install L2 agent on api node by default (Patch): 
+=========================================================
+
+https://github.com/stackforge/packstack/commit/bd36954
+
+Apply this manually in the controller node (where packstack is run from) to fix it:
+
+File: /usr/lib/python2.6/site-packages/packstack/plugins/neutron_350.py
+
+# local ip error
+
+To solve the problem with packstack trying to set up the OVS agent on the controller, I patched the packstack neutron plugin: 
+
+I replaced the following line (805) in create_l2_agent_manifests:
+
+   for host in api_hosts | compute_hosts | dhcp_hosts | l3_hosts:
+
+With:
+
+   for host in compute_hosts | dhcp_hosts | l3_hosts:
+
+Note:
+-----
+
+Possibly related to this, the following needs to be added manually in the controller node in the file /etc/neutron/plugin.ini at the very bottom:
+
+[SECURITYGROUP]
+firewall_driver=neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+
+
+3. Need to use python-qpid 0.18 (Workaround)
+============================================
+
+neutron-server startup fails if using python-qpid 0.22 from rhel-6-server-rh-common-rpms
+
+python-qpid-0.18-12.el6.noarch from rhel-6-server-mrg-messaging-2-rpms is needed.
+
+Make sure rhel-6-server-rh-common-rpms is disabled and rhel-6-server-mrg-messaging-2-rpms is enabled in all hosts before proceeding with the Packstack deployment.
+
+Note:
+-----
+
+If already installed: To solve the python-qpid issue, I ran the following across all the machines:
+
+ for x in {76..78}; do
+   cat <<-EOF | ssh 192.177.0.$x
+   yum -y remove python-qpid
+   yum-config-manager --disable rhel-6-server-rh-common-rpms
+   yum-config-manager --enable rhel-6-server-mrg-messaging-2-rpms
+   yum -y install python-qpid
+   EOF
+ done
+
+This removes python-qpid installed from the RH-COMMON channel, disables the RH-COMMON channel, enables the MRG channel, and then re-installs python-qpid (this time the correct version).
+
+4. Need an updated Facter for RHEL OSP 4 (Workaround)
+=====================================================
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1143885
+
+Version facter-1.6.6-1.el6_4.x86_64 from rhel-6-server-openstack-4.0-rpms is old.
+
+facter-1.7.6-2.el6sat.x86_64 from rhel-6-server-rh-common-rpms is needed.
+
+Install facter manually in all the hosts before proceeding to with the Packstack deployment.
+
+Disable the channel after facter is installed:
+
+subscription-manager repos --disable=rhel-6-server-rh-common-rpms
+
+
