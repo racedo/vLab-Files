@@ -12,7 +12,7 @@ EULA_it  LoadBalancer      RELEASE-NOTES-fr-FR.html  RELEASE-NOTES-or-IN.html  r
 EULA_ja  media.repo        RELEASE-NOTES-gu-IN.html  RELEASE-NOTES-pa-IN.html  ResilientStorage
 EULA_ko  Packages          RELEASE-NOTES-hi-IN.html  RELEASE-NOTES-pt-BR.html  RPM-GPG-KEY-redhat-beta
 
-cp -a /tmp/rhel/* media/rhel/6.5/os/x86_64/
+cp -a /tmp/rhel/* /var/www/html/repos/released/rhel/6.5/os/x86_64
 
 # Example with RHEL 7 DVD: http://red.ht/1vBSk5g
 
@@ -22,19 +22,9 @@ createrepo -g /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/Packages/
 
 # FIXME: Describe createrepo example with RHEL 6
 
-# If it can run on port 80
-
 cat /etc/httpd/conf.d/pxe-foreman.conf
-Alias /rhel/6.5/os/x86_64 /home/VMs/media/rhel/6.5/os/x86_64/
 
-<Directory /home/VMs/media/rhel/6.5/os/x86_64>
- Options Indexes FollowSymLinks
- Order Deny,Allow
- Deny from all
- Allow from 127.0.0.1 192.168.1.0/16
-</Directory>
-
-# If a different port needed (example with repos and media):
+# Example with repos and media on port 81:
 
 listen 81
 <VirtualHost *:81>
@@ -54,9 +44,21 @@ listen 81
      Deny from all
      Allow from 127.0.0.1 192.168.1.0/16 10.0.0.0/16
    </Directory>
+   
+   Alias /rhel/6.5/os/x86_64 /var/www/html/repos/released/rhel/6.5/os/x86_64
+
+   <Directory /var/www/html/repos/released/rhel/6.5/os/x86_64>
+     Options Indexes FollowSymLinks
+     Order Deny,Allow
+     Deny from all
+     Allow from 127.0.0.1 192.168.1.0/16 10.0.0.0/16
+   </Directory>
+   
 </VirtualHost>
 
 # Make sure port is included in selinux
+
+yum -y install policycoreutils-python
 
 semanage port -l | grep -w http_port_t
 http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000
