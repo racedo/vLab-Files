@@ -14,10 +14,13 @@ EULA_ko  Packages          RELEASE-NOTES-hi-IN.html  RELEASE-NOTES-pt-BR.html  R
 
 cp -a /tmp/rhel/* media/rhel/6.5/os/x86_64/
 
-# FIXME: Example with RHEL 7 DVD
-# FIXME: Use createrepo -g with the comps.xml found in the repo mirrored with reposync
+# Example with RHEL 7 DVD: http://red.ht/1vBSk5g
+
+# Use createrepo -g with the comps.xml found in the repo mirrored with reposync
+
 createrepo -g /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/Packages/comps.xml /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/
-# FIXME: Describe the whole repo creation process with reposync + createrepo + mount -o loop RHEL 7 DVD and symlink Packages to synced repos
+
+# FIXME: Describe createrepo example with RHEL 6
 
 # If it can run on port 80
 
