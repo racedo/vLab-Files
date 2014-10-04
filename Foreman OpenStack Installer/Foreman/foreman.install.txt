@@ -38,8 +38,12 @@ yum -y install openstack-packstack
 RHEL 6.5 OSP 5 (Staypuft / Foreman rhel-osp-installer)
 ======================================================
 
+# Channels needed for the Installer: http://red.ht/1vBReqa
+# Channels needed if synching: subscription-manager repos --enable=rhel-6-server-openstack-foreman-rpms --enable=rhel-6-server-rpms --enable=rhel-6-server-rh-common-rpms --enable=rhel-6-server-openstack-5.0-rpms
+
+
 subscription-manager register --auto-attach
 subscription-manager repos --disable=*
-subscription-manager repos --enable=rhel-6-server-openstack-foreman-rpms --enable=rhel-6-server-rpms --enable=rhel-6-server-rh-common-rpms --enable=rhel-6-server-openstack-5.0-rpms
+subscription-manager repos --enable=rhel-6-server-openstack-foreman-rpms --enable=rhel-6-server-rpms --enable=rhel-server-rhscl-6-rpms
 yum -y update
 yum -y install rhel-osp-installer
