@@ -1,3 +1,5 @@
+# These instructions are for Foreman in OSP 4
+#
 # Add media. If built repo at http://192.168.1.10/rhel/6.5/os/x86_64/ then:
 
 More > Provisioning > Installation Media > OpenStack RHEL mirror: http://192.168.1.10/rhel/6.5/os/x86_64/
