@@ -71,6 +71,13 @@ name=rhel-server-rhscl-7-rpms
 baseurl=http://10.0.0.129:81/repos/rhel-server-rhscl-7-rpms
 gpgcheck=0
 enabled=1
+
+[rhel-ha-for-rhel-7-server-rpms]
+name=rhel-ha-for-rhel-7-server-rpms
+baseurl=http://10.0.0.129:81/repos/rhel-ha-for-rhel-7-server-rpms
+gpgcheck=0
+enabled=1
+
 EOF
 
 # Partition table with 2 disks for cinder. Make sure this line in the Partition Table "LVM with cinder-volumes" has sdb instead of sda
