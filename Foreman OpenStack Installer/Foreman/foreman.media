@@ -65,7 +65,7 @@ http_port_t                    tcp      80, 81, 443, 488, 8008, 8009, 8443, 9000
 
 # Enable selinux context:
 
-semanage fcontext -a -t httpd_sys_content_t "/var/www/html(/.*)?"
+chcon -Rv --type=httpd_sys_content_t /var/www/html/repos/
 
 # If /var/www/html is a NFS share:
 
