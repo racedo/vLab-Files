@@ -1,4 +1,4 @@
-# Assuming eth2 is the external interface used with br-ex:
+# Assuming eth0 is the external interface used with br-ex:
 
 /etc/sysconfig/network-scripts/ifcfg-eth0
 
