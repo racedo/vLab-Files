@@ -1,0 +1,162 @@
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Installation_and_Configuration_Guide/sect-Configure_the_Object_Storage_Service.html
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Configuration_Reference_Guide/rsyncd-configuration.html
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Installation_and_Configuration_Guide/Validating_the_Object_Storage_Service_Installation.html
+
+In the Foreman OpenStack Platform Installer we need to setup puppet first for the pacemaker+haproxy in the host group:
+
+For swift in Advanced Configuration of the Deployment:
+
+    Swift internal vip: A free IP which will be used to rsync the /etc/swift directory between the nodes.
+
+    Swift storage device: device1
+
+    Swift storage ips: <%= @host.deployment.network_query.controller_ips('Storage') %> or <%= @host.network_query.controller_ips('Storage') %>
+
+Then if we want Glance backed by Swift (quickstack::pacemaker::glance, can be done from Advanced Configuration too):
+
+    backend: swift
+    swift_store_auth_address: http://192.168.1.150:5000/v2.0
+    swift_store_key: da8574029f01e8b1ff27e83c0f7e791d
+    swift_store_user: services:glance
+
+Note that the auth address and password are taken from the deployment setup that has been.
+
+Build the rings for account, container and boject for each device and node:
+
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.101:6002/device1 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.101:6002/device2 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.101:6002/device3 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.101:6002/device4 100
+
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.101:6001/device1 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.101:6001/device2 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.101:6001/device3 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.101:6001/device4 100
+
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.101:6000/device1 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.101:6000/device2 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.101:6000/device3 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.101:6000/device4 100
+
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.102:6002/device1 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.102:6002/device2 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.102:6002/device3 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.102:6002/device4 100
+
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.102:6001/device1 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.102:6001/device2 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.102:6001/device3 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.102:6001/device4 100
+
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.102:6000/device1 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.102:6000/device2 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.102:6000/device3 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.102:6000/device4 100
+
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.103:6002/device1 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.103:6002/device2 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.103:6002/device3 100
+  swift-ring-builder /etc/swift/account.builder add z1-192.168.1.103:6002/device4 100
+
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.103:6001/device1 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.103:6001/device2 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.103:6001/device3 100
+  swift-ring-builder /etc/swift/container.builder add z1-192.168.1.103:6001/device4 100
+
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.103:6000/device1 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.103:6000/device2 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.103:6000/device3 100
+  swift-ring-builder /etc/swift/object.builder add z1-192.168.1.103:6000/device4 100
+
+  swift-ring-builder /etc/swift/account.builder rebalance
+  swift-ring-builder /etc/swift/container.builder rebalance
+  swift-ring-builder /etc/swift/object.builder rebalance
+
+  chown -R root:swift /etc/swift
+  scp /etc/swift/*gz 192.168.1.102:/etc/swift/
+  scp /etc/swift/*gz 192.168.1.103:/etc/swift/
+
+Install the packages needed for Swift storage on the three nodes:
+
+ yum -y install openstack-swift-container openstack-swift-account openstack-swift-object
+
+ systemctl enable openstack-swift-account
+ systemctl enable openstack-swift-container
+ systemctl enable openstack-swift-object
+
+ systemctl start openstack-swift-account
+ systemctl start openstack-swift-container
+ systemctl start openstack-swift-object
+
+ systemctl enable openstack-swift-account-replicator
+ systemctl enable openstack-swift-container-replicator
+ systemctl enable openstack-swift-object-replicator
+
+ systemctl start openstack-swift-account-replicator
+ systemctl start openstack-swift-container-replicator
+ systemctl start openstack-swift-object-replicator
+
+ systemctl -l status openstack-swift-account-replicator
+ systemctl -l status openstack-swift-container-replicator
+ systemctl -l status openstack-swift-object-replicator
+
+Start the Swift Proxy service in all the nodes:
+
+  systemctl enable openstack-swift-proxy
+
+  systemctl start openstack-swift-proxy
+
+  systemctl status openstack-swift-proxy
+
+
+If we need to install Swift Proxy and Swift storage together we need to create a new setup for the replicators in each node.
+
+Create this in the three nodes with the IP of the storage subnet in each host.
+
+Create /etc/rsync-swift_storage.conf (example can be found at /usr/share/doc/openstack-swift-object-1.13.1/rsyncd.conf-sample):
+
+pid file = /var/run/rsyncd.pid
+uid = nobody
+gid = nobody
+use chroot = no
+log format = %t %a %m %f %b
+syslog facility = local3
+timeout = 300
+address = 192.168.1.102
+
+[account]
+max connections = 2
+path = /srv/node
+read only = false
+lock file = /var/lock/account.lock
+
+[container]
+max connections = 4
+path = /srv/node
+read only = false
+lock file = /var/lock/container.lock
+
+[object]
+max connections = 8
+path = /srv/node
+read only = false
+lock file = /var/lock/object.lock
+
+Then also /etc/xinetd.d/rsync-swift_storage where 192.168.1.102 is the local IP of the storage network:
+
+service rsync
+{
+        port = 873
+        disable = no
+        socket_type = stream
+        protocol = tcp
+        wait = no
+        user = root
+        group = root
+        server = /usr/bin/rsync
+        bind = 192.168.1.102
+        server_args = --daemon --config /etc/rsync-swift_storage.conf
+
+}
+
+Now restart xinetd and all the replicators. This process is needed in all the storage nodes.
