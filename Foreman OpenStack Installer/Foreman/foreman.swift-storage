@@ -1,6 +1,33 @@
+This guide is based on:
+
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Installation_and_Configuration_Guide/sect-Configure_the_Object_Storage_Service.html
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Configuration_Reference_Guide/rsyncd-configuration.html
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Installation_and_Configuration_Guide/Validating_the_Object_Storage_Service_Installation.html
+
+It is meant for a Foreman OSP Installer HA deployment and 3 Swift hosts with 4 devices each.
+
+We create the /srv/node mount points with the allocated disks using the OpenStack Default Partition Table in the OSP Installer. This Partition should be applied to the Swift Storage nodes.
+
+#Dynamic
+zerombr
+clearpart --all --initlabel
+part /boot --fstype ext3 --size=500 --ondisk=sda
+part swap --size=1024 --ondisk=sda
+part pv.01 --size=1024 --grow --ondisk=sda
+part pv.02 --size=1024 --grow --ondisk=sdb
+part pv.03 --size=1024 --grow --ondisk=sdc
+part pv.04 --size=1024 --grow --ondisk=sdd
+part pv.05 --size=1024 --grow --ondisk=sde
+volgroup vg_root pv.01
+volgroup vg_swift1 pv.02
+volgroup vg_swift2 pv.03
+volgroup vg_swift3 pv.04
+volgroup vg_swift4 pv.05
+logvol  /  --vgname=vg_root  --size=1 --grow --name=lv_root
+logvol  /srv/node/device1 --vgname=vg_swift1  --size=1 --grow --name=lv_swift1
+logvol  /srv/node/device2  --vgname=vg_swift2  --size=1 --grow --name=lv_swift2
+logvol  /srv/node/device3  --vgname=vg_swift3  --size=1 --grow --name=lv_swift3
+logvol  /srv/node/device4  --vgname=vg_swift4  --size=1 --grow --name=lv_swift4
 
 In the Foreman OpenStack Platform Installer we need to setup puppet first for the pacemaker+haproxy in the host group:
 
