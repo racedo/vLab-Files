@@ -1,0 +1,39 @@
+These steps are done in the node where the neutron agents are installed (controller by default).
+
+# yum -y install haproxy
+
+# egrep -v "^$|^#" /etc/neutron/lbaas_agent.ini
+[DEFAULT]
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+device_driver = neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver
+[haproxy]
+
+# vi /etc/openstack-dashboard/local_settings
+
+OPENSTACK_NEUTRON_NETWORK = {'enable_lb': True,
+
+# vi /etc/neutron/neutron.conf
+
+service_plugins = neutron.services.loadbalancer.plugin.LoadBalancerPlugin,lbaas
+
+service_provider = LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+
+Comment service_provider in /usr/share/neutron/neutron-dist.conf # https://bugzilla.redhat.com/show_bug.cgi?format=multiple&id=1022725
+
+# systemctl enable neutron-lbaas-agent
+# systemctl start neutron-lbaas-agent
+
+Check everything is fine:
+
+# neutron agent-list | grep Load
+| 3dd9dd89-d0da-4285-897a-e1d906f3eadb | Loadbalancer agent | mac005056259557.vm.lab | :-)   | True           |
+
+Additional notes from pnavarro:
+
+# groupadd nogroup
+
+To avoid:
+
+2014-10-30 14:18:47.082 17541 TRACE neutron.services.loadbalancer.agent.agent_manager Stderr: "[ALERT] 302/141847 (17696) : parsing [/var/lib/neutron/lbaas/5869ef4e-eb0b-4e47-9aa1-eab1fb7ee886/conf:4] : cannot find group id for 'nogroup' (0:Success)\n[ALERT] 302/141847 (17696) : Error(s) found in configuration file : /var/lib/neutron/lbaas/5869ef4e-eb0b-4e47-9aa1-eab1fb7ee886/conf\n[ALERT] 302/141847 (17696) : Fatal errors found in configuration.\n"
+2014-10-30 14:18:47.082 17541 TRACE neutron.services.loadbalancer.agent.agent_manager 
+2014-10-30 14:18:47.084 17541 DEBUG neutron.openstack.common.rpc.amqp [req-849bacb3-1c04-413
