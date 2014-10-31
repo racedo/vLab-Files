@@ -1,8 +1,0 @@
-# Using 172.16.0.254 to be in the same default network puppet uses for the OpenStack controller (controller is 172.16.0.1 by default)
-DEVICE=eth1
-ONBOOT=yes
-TYPE=Ethernet
-BOOTPROTO=none
-IPADDR0=172.16.0.254
-PREFIX0=24
-MTU=1454
