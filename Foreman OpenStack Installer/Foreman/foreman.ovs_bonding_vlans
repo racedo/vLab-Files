@@ -1,0 +1,165 @@
+This setup consists in using Open vSwitch for both, bonding and VLAN tagging in any kind of RHEL/CentOS server. This setup will allow us to use the same VLANs for Neutron Provider Networks and system management without conflicts.
+
+1. Create the OVS bonding interface:
+
+ Setup info in /usr/share/doc/openvswitch-2.1.2/README.RHEL and further info in 'man ovs-vswitchd.conf.db'
+
+# cat ifcfg-bond0
+DEVICE=bond0
+ONBOOT=yes
+DEVICETYPE=ovs
+TYPE=OVSBond
+OVS_BRIDGE=br-trunk
+BOOTPROTO=none
+BOND_IFACES="eno50336512 eno67115776 eno83887104 eno33557248"
+# Note that we will change this to lacp active and balance-tcp (man ovs-vswitchd.conf.db).
+OVS_OPTIONS="bond_mode=active-backup"
+NM_CONTROLLED=no
+
+ Make sure the slave interfaces are all like this, just enough to be in UP and RUNNING state:
+ 
+# cat ifcfg-eno50336512
+DEVICE=eno50336512
+TYPE=Ethernet
+BOOTPROTO=none
+NAME=eno50336512
+ONBOOT=yes
+
+ifcfg-br-trunk doesn't change.
+
+
+2. Create the VLANs as OVS ports:
+
+This is necessary because if we have VLAN interfaces managed by the kernel instead of OVS and we want to use the same VLAN for Neutron networks the kernel VLAN interface will keep the packets and won't forward them to phy-br-XXX.
+
+Manually move config from the OSP Installer in interfaces to bonding setup.
+
+For example if we created and subnets with VLANs 200, 201, 203 and 523 in the OSP Installer and associated to the hosts' NICs we move them:
+
+ifcfg-eno33557248.200 -> ifcfg-vlan200
+ifcfg-eno33557248.201 -> ifcfg-vlan201
+ifcfg-eno33557248.203 -> ifcfg-vlan203
+ifcfg-eno33557248.523 -> ifcfg-vlan523
+
+So what used to be:
+
+# cat ifcfg-eno33557248.200
+BOOTPROTO="none"
+IPADDR="192.168.1.144"
+NETMASK="255.255.255.224"
+DEVICE="eno33557248.200"
+ONBOOT=no
+PEERDNS=no
+PEERROUTES=no
+VLAN=yes
+NM_CONTROLLED=no
+
+Becomes:
+
+# cat ifcfg-vlan200
+DEVICE=vlan200
+ONBOOT=yes
+DEVICETYPE=ovs
+TYPE=OVSIntPort
+BOOTPROTO=static
+IPADDR=192.168.1.144
+NETMASK=255.255.255.224
+OVS_BRIDGE=br-trunk
+OVS_OPTIONS="tag=200"
+OVS_EXTRA="set Interface $DEVICE external-ids:iface-id=$(hostname -s)-$DEVICE-vif"
+HOTPLUG=no
+
+Make sure none of the slaves is a port of the main bridge br-trunk and delete it if it is:
+
+# ovs-vsctl del-port br-trunk eth2
+
+Note: I had to restart the host rather than just the network to get rid of some references. Probably because of multiple tests also with the Linux bonding before trying this...
+
+3. Sanity checks
+Check the bond is in good order:
+
+# ovs-appctl bond/show
+---- bond0 ----
+bond_mode: balance-slb
+bond-hash-basis: 0
+updelay: 0 ms
+downdelay: 0 ms
+next rebalance: 3730 ms
+lacp_status: off
+
+slave eno33557248: enabled
+        may_enable: true
+
+slave eno50336512: enabled
+        active slave
+        may_enable: true
+        hash 235: 0 kB load
+
+slave eno67115776: enabled
+        may_enable: true
+
+slave eno83887104: enabled
+        may_enable: true
+        hash 209: 225 kB load
+
+Check the Open vSwitch looks like we would expect:
+
+# ovs-vsctl show
+b076e780-ffca-45ea-b155-56a9d9293f9d
+    Bridge br-trunk
+        Port br-trunk
+            Interface br-trunk
+                type: internal
+        Port "bond0"
+            Interface "eno50336512"
+            Interface "eno67115776"
+            Interface "eno83887104"
+            Interface "eno33557248"
+        Port "vlan523"
+            tag: 523
+            Interface "vlan523"
+                type: internal
+        Port "vlan201"
+            tag: 201
+            Interface "vlan201"
+                type: internal
+        Port "vlan203"
+            tag: 203
+            Interface "vlan203"
+                type: internal
+        Port "vlan200"
+            tag: 200
+            Interface "vlan200"
+                type: internal
+    Bridge br-int
+        fail_mode: secure
+        Port int-br-trunk
+            Interface int-br-trunk
+        Port br-int
+            Interface br-int
+                type: internal
+    ovs_version: "2.1.3"
+    
+
+If this node is a RHEL OSP HA controller, When everything is setup just reboot another host and observe how pacemaker moves lots of stuff to the node:
+
+# ip -o -4 a
+1: lo    inet 127.0.0.1/8 scope host lo\       valid_lft forever preferred_lft forever
+2: eno16777984    inet 192.168.100.101/24 brd 192.168.100.255 scope global dynamic eno16777984\       valid_lft 575sec preferred_lft 575sec
+10: vlan203    inet 192.1681.24/27 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.19/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.5/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.13/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.7/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.12/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.3/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.10/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.4/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.17/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+10: vlan203    inet 192.1681.16/32 brd 192.1681.31 scope global vlan203\       valid_lft forever preferred_lft forever
+11: vlan201    inet 192.1681.98/28 brd 192.1681.111 scope global vlan201\       valid_lft forever preferred_lft forever
+12: vlan200    inet 192.1681.144/27 brd 192.1681.159 scope global vlan200\       valid_lft forever preferred_lft forever
+12: vlan200    inet 192.1681.133/32 brd 192.1681.159 scope global vlan200\       valid_lft forever preferred_lft forever
+12: vlan200    inet 192.1681.139/32 brd 192.1681.159 scope global vlan200\       valid_lft forever preferred_lft forever
+12: vlan200    inet 192.1681.135/32 brd 192.1681.159 scope global vlan200\       valid_lft forever preferred_lft forever
+13: vlan523    inet 10.1.1.1/24 brd 10.1.1.255 scope global vlan523\       valid_lft forever preferred_lft forever
