@@ -55,6 +55,8 @@ Configure ceilometer
   systemctl start openstack-ceilometer-alarm-evaluator
   systemctl start openstack-ceilometer-alarm-notifier
   systemctl start openstack-ceilometer-notification
+  
+  Note that the openstack-ceilometer-notification needs to be in all the controlers so that Cinder and Neutron also provide meters.
 
 
   openstack-config --set /etc/glance/glance-api.conf DEFAULT notifier_strategy rabbit
@@ -83,13 +85,16 @@ classes:
 In the puppet master (OSP Installer)
 
 vi /etc/puppet/environments/production/modules/nova/manifests/init.pp
-  $notification_driver      = ["nova.openstack.common.notifier.rpc_notifier","ceilometer.compute.nova_notifier"],
   $notify_on_state_change   = 'vm_and_task_state',
 
 Back in the compute nodes:
 
 openstack-config --set /etc/nova/nova.conf DEFAULT instance_usage_audit True
 openstack-config --set /etc/nova/nova.conf DEFAULT instance_usage_audit_period hour
+
+And add a notification_driver entry in addition to the existing one to nova.conf:
+
+notification_driver=ceilometer.compute.nova_notifier
 
 systemctl enable openstack-ceilometer-compute
 systemctl restart openstack-ceilometer-compute
