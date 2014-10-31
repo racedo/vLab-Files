@@ -37,3 +37,5 @@ To avoid:
 2014-10-30 14:18:47.082 17541 TRACE neutron.services.loadbalancer.agent.agent_manager Stderr: "[ALERT] 302/141847 (17696) : parsing [/var/lib/neutron/lbaas/5869ef4e-eb0b-4e47-9aa1-eab1fb7ee886/conf:4] : cannot find group id for 'nogroup' (0:Success)\n[ALERT] 302/141847 (17696) : Error(s) found in configuration file : /var/lib/neutron/lbaas/5869ef4e-eb0b-4e47-9aa1-eab1fb7ee886/conf\n[ALERT] 302/141847 (17696) : Fatal errors found in configuration.\n"
 2014-10-30 14:18:47.082 17541 TRACE neutron.services.loadbalancer.agent.agent_manager 
 2014-10-30 14:18:47.084 17541 DEBUG neutron.openstack.common.rpc.amqp [req-849bacb3-1c04-413
+
+FIXME: I haven't managed to setup puppet so that it adds 'lbaas' to the service_plugins in neutron.conf (!!)
