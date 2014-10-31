@@ -1,4 +1,4 @@
-# As we are using GRE tunnels blksize needs to be 1546 - 32 = 1424 (see man in.tftpd fpr -B and -r)
+# If we are using GRE tunnels blksize needs to be 1546 - 32 = 1424 (see man in.tftpd fpr -B and -r)
 # Edit /etc/xinetd.d/tftp
 
 server_args     = -v -s /var/lib/tftpboot/ -m /etc/tftpd.map -B 1424 -r blksize
