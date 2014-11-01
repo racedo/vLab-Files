@@ -2,7 +2,19 @@ This setup consists in using Open vSwitch for both, bonding and VLAN tagging in 
 
 1. Create the OVS bonding interface:
 
- Setup info in /usr/share/doc/openvswitch-2.1.2/README.RHEL and further info in 'man ovs-vswitchd.conf.db'
+This assumes we have a bridge called br-trunk which looks similar to this:
+
+# cat ifcfg-br-trunk
+NAME=br-trunk
+DEVICE=br-trunk
+ONBOOT=yes
+PEERDNS=no
+DEVICETYPE=ovs
+OVSBOOTPROTO=none
+TYPE=OVSBridge
+HOTPLUG=no
+
+Setup info in /usr/share/doc/openvswitch-2.1.2/README.RHEL and further info in 'man ovs-vswitchd.conf.db'
 
 # cat ifcfg-bond0
 DEVICE=bond0
