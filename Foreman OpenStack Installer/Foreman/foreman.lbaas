@@ -28,7 +28,7 @@ Check everything is fine:
 # neutron agent-list | grep Load
 | 3dd9dd89-d0da-4285-897a-e1d906f3eadb | Loadbalancer agent | mac005056259557.vm.lab | :-)   | True           |
 
-Additional notes from pnavarro:
+Additional notes to work around https://bugzilla.redhat.com/show_bug.cgi?id=1122724:
 
 # groupadd nogroup
 
