@@ -1,0 +1,20 @@
+# First register to RHN with subscription-manager register
+# Then subscribe to all the channels to be synchronised
+
+reposync -q -d -n -p /var/www/html/repos/ -r rhel-7-server-openstack-5.0-rpms
+createrepo /var/www/html/repos/rhel-7-server-openstack-5.0-rpms/
+
+reposync -q -d -n -p /var/www/html/repos/ -r rhel-7-server-rpms
+createrepo /var/www/html/repos/rhel-7-server-rpms
+
+reposync -q -d -n -l -p /var/www/html/repos/ -r rhel-7-server-rh-common-rpms
+createrepo /var/www/html/repos/rhel-7-server-rh-common-rpms
+
+reposync -q -d -n -l -p /var/www/html/repos/ -r rhel-server-rhscl-7-rpms
+createrepo /var/www/html/repos/rhel-server-rhscl-7-rpms
+
+reposync -q -d -n -l -p /var/www/html/repos/ -r rhel-ha-for-rhel-7-server-rpms
+createrepo /var/www/html/repos/rhel-ha-for-rhel-7-server-rpms
+
+# This is needed to have the DVD used as media source in network installations
+createrepo -g /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/Packages/comps.xml /var/www/html/repos/released/RHEL-7/7.0/Server/x86_64/os/
