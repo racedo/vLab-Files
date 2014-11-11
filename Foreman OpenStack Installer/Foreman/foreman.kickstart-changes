@@ -44,6 +44,8 @@ append initrd=<%= @initrd %> ks=<%= foreman_url('provision')%> network ks.sendma
 # Replace CDN by local repos. Replace this line in the "Kickstart RHEL Default" template
 # Note: in release A2 just use the base url in the wizard like this:
 
+http://10.0.0.129:81/repos/rhel-7-server-openstack-5.0-rpms
+http://10.0.0.129:81/repos/rhel-7-server-rpms
 http://10.0.0.129:81/repos/rhel-7-server-rh-common-rpms
 http://10.0.0.129:81/repos/rhel-server-rhscl-7-rpms
 http://10.0.0.129:81/repos/rhel-ha-for-rhel-7-server-rpms
