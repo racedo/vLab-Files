@@ -1,0 +1,25 @@
+# First register to RHN with subscription-manager register
+# Then subscribe to the channels to be synchronised:
+#
+# subscription-manager repos --disable=*
+# subscription-manager repos \
+# --enable=rhel-6-server-openstack-5.0-rpms \
+# --enable=rhel-6-server-openstack-foreman-rpms \
+# --enable=rhel-6-server-rpms \
+# --enable=rhel-6-server-rh-common-rpms \
+# --enable=rhel-server-rhscl-6-rpms
+
+reposync -q -n -d -p /var/www/html/repos/ -r rhel-6-server-openstack-foreman-rpms
+createrepo /var/www/html/repos/rhel-6-server-openstack-foreman-rpms
+
+reposync -q -d -n -p /var/www/html/repos/ -r rhel-6-server-rpms
+createrepo /var/www/html/repos/rhel-6-server-rpms
+
+reposync -q -d -n -l -p /var/www/html/repos/ -r rhel-6-server-rh-common-rpms
+createrepo /var/www/html/repos/rhel-6-server-rh-common-rpms
+
+reposync -q -d -n -l -p /var/www/html/repos/ -r rhel-server-rhscl-6-rpms
+createrepo /var/www/html/repos/rhel-server-rhscl-6-rpms
+
+reposync -q -d -n -l -p /var/www/html/repos/ -r rhel-6-server-openstack-5.0-rpms
+createrepo /var/www/html/repos/rhel-6-server-openstack-5.0-rpms
