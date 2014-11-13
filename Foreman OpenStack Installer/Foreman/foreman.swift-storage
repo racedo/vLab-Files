@@ -29,9 +29,13 @@ logvol  /srv/node/device2  --vgname=vg_swift2  --size=1 --grow --name=lv_swift2
 logvol  /srv/node/device3  --vgname=vg_swift3  --size=1 --grow --name=lv_swift3
 logvol  /srv/node/device4  --vgname=vg_swift4  --size=1 --grow --name=lv_swift4
 
-In the Foreman OpenStack Platform Installer we need to setup puppet first for the pacemaker+haproxy in the host group:
+In the Foreman OpenStack Platform Installer we need to setup Puppet first in Advanced Configuration in the Deployment:
 
-For swift in Advanced Configuration of the Deployment:
+Keystone (HA):
+
+    Swift: true 
+
+Swift (HA):
 
     Swift internal vip: A free IP which will be used to rsync the /etc/swift directory between the nodes.
 
@@ -42,11 +46,9 @@ For swift in Advanced Configuration of the Deployment:
 Then if we want Glance backed by Swift (quickstack::pacemaker::glance, can be done from Advanced Configuration too):
 
     backend: swift
-    swift_store_auth_address: http://192.168.1.150:5000/v2.0
+    swift_store_auth_address: http://192.168.1.150:5000/v2.0 # Note: I don't know how to figure this out before first deploying
     swift_store_key: da8574029f01e8b1ff27e83c0f7e791d
     swift_store_user: services:glance
-
-Note that the auth address and password are taken from the deployment setup that has been.
 
 Build the rings for account, container and boject for each device and node:
 
