@@ -1,3 +1,6 @@
+Note: In Staypuft A2 + this patch https://github.com/theforeman/foreman-installer-staypuft/pull/111 Linux bonding can be setup from the Installer. I still prefer OVS bonding + OVS VLAN tagging. The kickstart_networking_setup snippet in Provisioning Templates could be adapted to do what's explained here.
+
+
 This setup consists in using Open vSwitch for both, bonding and VLAN tagging in any kind of RHEL/CentOS server. This setup will allow us to use the same VLANs for Neutron Provider Networks and system management without conflicts.
 
 1. Create the OVS bonding interface:
