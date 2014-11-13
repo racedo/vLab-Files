@@ -31,6 +31,10 @@ logvol  /srv/node/device4  --vgname=vg_swift4  --size=1 --grow --name=lv_swift4
 
 In the Foreman OpenStack Platform Installer we need to setup Puppet first in Advanced Configuration in the Deployment:
 
+HA (Controller):
+
+    Include swift: true
+
 Keystone (HA):
 
     Swift: true 
