@@ -4,7 +4,7 @@ https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Configuration_Reference_Guide/rsyncd-configuration.html
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/Installation_and_Configuration_Guide/Validating_the_Object_Storage_Service_Installation.html
 
-It is meant for a Foreman OSP Installer HA deployment and 3 Swift hosts with 4 devices each.
+It describes using Foreman OSP Installer with and HA deployment where the 3 controllers are also Swift Storage hosts with 4 devices each.
 
 We create the /srv/node mount points with the allocated disks using the OpenStack Default Partition Table in the OSP Installer. This Partition should be applied to the Swift Storage nodes.
 
@@ -42,17 +42,18 @@ Keystone (HA):
 Swift (HA):
 
     Swift internal vip: A free IP which will be used to rsync the /etc/swift directory between the nodes.
-
     Swift storage device: device1
-
     Swift storage ips: <%= @host.deployment.network_query.controller_ips('Storage') %> or <%= @host.network_query.controller_ips('Storage') %>
 
-Then if we want Glance backed by Swift (quickstack::pacemaker::glance, can be done from Advanced Configuration too):
+Then, if we also want Glance backed by Swift, again in Advanced Settings of the Deployment:
+ 
+Glance (HA):
 
-    backend: swift
-    swift_store_auth_address: http://192.168.1.150:5000/v2.0 # Note: I don't know how to figure this out before first deploying
-    swift_store_key: da8574029f01e8b1ff27e83c0f7e791d
-    swift_store_user: services:glance
+   Backend: swift
+   Swift store auth address: http://192.168.1.150:5000/v2.0 # Note: I don't know how to figure this out before first deploying
+   Swift store user: glance
+   Swift store key: da8574029f01e8b1ff27e83c0f7e791d
+   Pcmk fs manage: false
 
 Build the rings for account, container and boject for each device and node:
 
