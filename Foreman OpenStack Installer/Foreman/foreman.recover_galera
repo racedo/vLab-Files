@@ -1,0 +1,8 @@
+Read: https://mariadb.com/kb/en/mariadb/documentation/replication/galera/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster
+
+In the node with the highest seqno (/var/lib/mysql/grastate.dat) check that mysqld is running and run:
+
+mysql -u root -p
+set global wsrep_provider_options="pc.bootstrap=true";
+
+Then, start or restart mariadb in the other two.
