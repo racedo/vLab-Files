@@ -59,7 +59,12 @@ Glance (HA):
    Swift store key: da8574029f01e8b1ff27e83c0f7e791d
    Pcmk fs manage: false
 
-3. After deployment is done, create the rings in the deployed hosts for all the devices.
+3. In the Controlelr Host Group parameters (this can't be done in Advanced Settings)
+
+   Override quickstack::pacemaker::params swift_user_password:
+       swift_user_password = any_password_you_like
+
+4. After deployment is done, create the rings in the deployed hosts for all the devices.
 
 Build the rings for account, container and boject for each device and node:
 
@@ -116,7 +121,7 @@ Build the rings for account, container and boject for each device and node:
   scp /etc/swift/*gz 192.168.1.102:/etc/swift/
   scp /etc/swift/*gz 192.168.1.103:/etc/swift/
 
-4. Install the packages needed for Swift storage on the three nodes:
+5. Install the packages needed for Swift storage on the three nodes:
 
  yum -y install openstack-swift-container openstack-swift-account openstack-swift-object
 
@@ -128,7 +133,7 @@ Build the rings for account, container and boject for each device and node:
  systemctl start openstack-swift-container
  systemctl start openstack-swift-object
 
-5. Start the Swift Proxy service in all the nodes:
+6. Start the Swift Proxy service in all the nodes:
 
   systemctl enable openstack-swift-proxy
 
@@ -137,7 +142,7 @@ Build the rings for account, container and boject for each device and node:
   systemctl status openstack-swift-proxy
 
 
-6. Setup the replicators
+7. Setup the replicators
 
 If we need to install Swift Proxy and Swift storage together (this is the case for this example with Swift Storage in the HA controllers) we need to create a new setup for the replicators in each node.
 
