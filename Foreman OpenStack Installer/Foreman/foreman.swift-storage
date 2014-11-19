@@ -45,7 +45,9 @@ Keystone (HA):
 
 Swift (HA):
 
-    Swift internal vip: A free IP which will be used to rsync the /etc/swift directory between the nodes.
+    Swift internal vip: A free IP which will be used by Puppet to:
+       a. rsync the /etc/swift directory between the nodes
+       b. For the Swift S3 endpoints created with keystone
     Swift storage device: device1
     Swift storage ips: <%= @host.deployment.network_query.controller_ips('Storage') %> or <%= @host.network_query.controller_ips('Storage') %>
 
@@ -59,7 +61,7 @@ Glance (HA):
    Swift store key: da8574029f01e8b1ff27e83c0f7e791d
    Pcmk fs manage: false
 
-3. In the Controlelr Host Group parameters (this can't be done in Advanced Settings)
+3. In the Controller Host Group parameters (this can't be done in Advanced Settings)
 
    Override quickstack::pacemaker::params swift_user_password:
        swift_user_password = any_password_you_like
