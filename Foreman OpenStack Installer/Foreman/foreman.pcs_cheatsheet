@@ -1,0 +1,21 @@
+PCS Command Line: 
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/High_Availability_Add-On_Reference/ch-pcscommand-HAAR.html
+
+pcs status
+pcs cluster status
+pcs cluster cib
+pcs resource show "resource_id"
+pcs resource enable "resource_id"
+pcs resource disable "resource_id"
+pcs resource cleanup "resource_id"
+pcs property set maintenance-mode=true
+
+Fencing: 
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/High_Availability_Add-On_Reference/ch-fencing-HAAR.html
+
+pcs stonith show
+pcs stonith fence node [--off]
+pcs property set stonith-enabled=false
+crm_verify -L -V
+corosync-cfgtool -s
+/etc/corosync/corosync.conf
