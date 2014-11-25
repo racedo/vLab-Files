@@ -17,5 +17,9 @@ mysqld_safe --wsrep-new-cluster
 
 And in the other two:
 
-rm /var/lib/mysql//grastate.dat
+rm /var/lib/mysql/grastate.dat
 systemctl start mariadb
+
+Note: If Pacemaker is protecting the systemd service mysqld do not start mysqld / mariadb with systemctl and let pacemaker do it. Cleanup the failures and Pacemaker will try starting it:
+
+pcs resource cleanup mysqld
