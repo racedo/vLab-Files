@@ -2,12 +2,12 @@ Read: https://mariadb.com/kb/en/mariadb/documentation/replication/galera/getting
 
 Option 1:
 
-In the node with the highest seqno (/var/lib/mysql/grastate.dat) check that mysqld is running and run:
+In the node with the highest seqno (/var/lib/mysql/grastate.dat) check that mysqld is running and make sure that mysqld is not running in the other two.
 
 mysql -u root -p
 set global wsrep_provider_options="pc.bootstrap=true";
 
-Then, start or restart mariadb in the other two.
+Then, systemctl start or restart mariadb in the other two.
 
 Option 2:
 
