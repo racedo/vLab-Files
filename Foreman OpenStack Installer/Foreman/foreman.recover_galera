@@ -2,21 +2,21 @@ Note: I haven't verified if this process has any  impact in the database content
 
 1. First find the node with highest seqno:
 
-cat /var/lib/mysql/grastate.dat in all the nodes:
-# GALERA saved state
-version: 2.1
-uuid:    2128b91c-6f5a-11e4-a69d-a212044ed6f5
-seqno:   672380
-cert_index:
+    cat /var/lib/mysql/grastate.dat in all the nodes:
+    # GALERA saved state
+    version: 2.1
+    uuid:    2128b91c-6f5a-11e4-a69d-a212044ed6f5
+    seqno:   672380
+    cert_index:
 
 If it says -1 then get it from the DB in each node:
 
-mysqld_safe --wsrep-recover|grep Recovered
-[...]
-141127 15:21:32 mysqld_safe WSREP: Recovered position 2128b91c-6f5a-11e4-a69d-a212044ed6f5:672380
-[...]
+    mysqld_safe --wsrep-recover|grep Recovered
+    [...]
+    141127 15:21:32 mysqld_safe WSREP: Recovered position 2128b91c-6f5a-11e4-a69d-a212044ed6f5:672380
+    [...]
 
-Then in the node with the highest seqno:
+Then, in the node with the highest seqno:
 
 1. Check mysqld is running and make sure that it's not running in the other two.
 
