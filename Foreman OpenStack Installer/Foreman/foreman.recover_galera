@@ -1,25 +1,38 @@
-Read: https://mariadb.com/kb/en/mariadb/documentation/replication/galera/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster
+Note: I haven't verified if this process has any  impact in the database content.
 
-Option 1:
+1. First find the node with highest seqno:
 
-In the node with the highest seqno (/var/lib/mysql/grastate.dat) check that mysqld is running and make sure that mysqld is not running in the other two.
+cat /var/lib/mysql/grastate.dat in all the nodes:
+# GALERA saved state
+version: 2.1
+uuid:    2128b91c-6f5a-11e4-a69d-a212044ed6f5
+seqno:   672380
+cert_index:
 
-mysql -u root -p
-set global wsrep_provider_options="pc.bootstrap=true";
+If it says -1 then get it from the DB in each node:
 
-Then, systemctl start or restart mariadb in the other two.
+mysqld_safe --wsrep-recover|grep Recovered
+[...]
+141127 15:21:32 mysqld_safe WSREP: Recovered position 2128b91c-6f5a-11e4-a69d-a212044ed6f5:672380
+[...]
 
-Option 2:
+Then in the node with the highest seqno:
 
-If mysqld is not running on any of the nodes and won't start do this on one node:
+1. Check mysqld is running and make sure that mysqld is not running in the other two.
+2. If not running on any node start manually mysqld: mysqld_safe --wsrep-new-cluster
+3. Log into mysql and do this:
 
-mysqld_safe --wsrep-new-cluster
+     mysql -u root -p
+     set global wsrep_provider_options="pc.bootstrap=true";
 
-And in the other two:
+4. In the other two nodes start mariadb/mysqld (mysqld is a symlink to mariadb systemd init script) 
+    
+     systemctl start mariadb
 
-rm /var/lib/mysql/grastate.dat
-systemctl start mariadb
-
-Note: If Pacemaker is protecting the systemd service mysqld do not start mysqld / mariadb with systemctl and let pacemaker do it. Cleanup the failures and Pacemaker will try starting it:
+5. Cleanup mysqld failures in Pacemaker (Pacemaker protects the mariadb service using the mysqld systemd service name):
 
 pcs resource cleanup mysqld
+
+References: 
+https://mariadb.com/kb/en/mariadb/documentation/replication/galera/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster
+http://www.percona.com/blog/2014/09/01/galera-replication-how-to-recover-a-pxc-cluster/
