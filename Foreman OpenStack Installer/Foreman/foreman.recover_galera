@@ -24,7 +24,7 @@ Then, in the node with the highest seqno:
 
     mysqld_safe --wsrep-new-cluster
     
-3. Log into mysql and do this:
+3. Log into mysql and do this (probably redundant with step 2.):
 
     mysql -u root -p
     set global wsrep_provider_options="pc.bootstrap=true";
