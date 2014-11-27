@@ -18,20 +18,30 @@ mysqld_safe --wsrep-recover|grep Recovered
 
 Then in the node with the highest seqno:
 
-1. Check mysqld is running and make sure that mysqld is not running in the other two.
-2. If not running on any node start manually mysqld: mysqld_safe --wsrep-new-cluster
+1. Check mysqld is running and make sure that it's not running in the other two.
+
+2. If not running on any node start it manually with wsrep-new-cluster:
+
+    mysqld_safe --wsrep-new-cluster
+    
 3. Log into mysql and do this:
 
-     mysql -u root -p
-     set global wsrep_provider_options="pc.bootstrap=true";
+    mysql -u root -p
+    set global wsrep_provider_options="pc.bootstrap=true";
 
 4. In the other two nodes start mariadb/mysqld (mysqld is a symlink to mariadb systemd init script) 
     
-     systemctl start mariadb
+    systemctl start mariadb
 
-5. Cleanup mysqld failures in Pacemaker (Pacemaker protects the mariadb service using the mysqld systemd service name):
+5. Kill mysqld and mysqld_safe in the first node (step 2.) and start it with systemd:
 
-pcs resource cleanup mysqld
+    killall -9 mysqld
+    killall -9 mysqld_safe
+    systemctl start mariadb
+
+6. Cleanup mysqld failures in Pacemaker (Pacemaker uses mysqld service name in with systemd):
+
+    pcs resource cleanup mysqld
 
 References: 
 https://mariadb.com/kb/en/mariadb/documentation/replication/galera/getting-started-with-mariadb-galera-cluster/#restarting-the-cluster
