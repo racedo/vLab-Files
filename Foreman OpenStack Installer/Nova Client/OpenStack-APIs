@@ -1,0 +1,56 @@
+This is a list of basic examples that show how the OpenStack API works. 
+
+The Chrome App "Advanced REST client" or any other REST client are useful to try this examples.'curl' can also be used.
+
+- List Keystone API versions:
+
+Method: GET
+URL: http://10.0.0.129:5000/
+
+- Authenticate, get token and list of endpoints that can be queried:
+
+Method: POST
+URL: http://10.0.0.129:5000/v2.0/tokens
+Header: Content-Type: application/json
+Request body:
+
+{
+    "auth": {
+        "tenantName": "demo",
+        "passwordCredentials": {
+            "username": "demo",
+            "password": "demo_user_password"
+        }
+    }
+}
+
+- List tenants (admin query, equivalent to 'keystone --debug tenant-list'):
+
+Method: GET
+URL: http://10.0.0.129:35357/v2.0/tenants
+Header: X-Auth-Token: "token_obtained_from_authenticatation_call"
+
+
+- Get a 'scoped token' to operate as a tenant (recommended):
+
+Method: POST
+URL: http://10.0.0.129:5000/v2.0/tokens
+Request body:
+
+{
+   "auth":{
+      "tenantName":"admin",
+      "token":{
+         "id":"token_obtained_from_authenticatation_call"
+      }
+   }
+}
+
+- List neutron networks as a tenant with the 'scoped token' (equivalent to 'neutron --debug net-list'):
+
+Method: GET
+URL: http://10.0.0.129:9696/v2.0/networks.json
+Header:
+
+X-Auth-Token: "token_obtained_from_authenticatation_call"
+Content-Type: application/json"
