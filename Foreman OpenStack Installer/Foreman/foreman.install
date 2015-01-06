@@ -9,7 +9,7 @@ RHEL 7 OSP 5 (No Foreman, just Packstack)
 
 subscription-manager register --auto-attach
 subscription-manager repos --disable=*
-subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-server-rh-7-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-openstack-5.0-rpms --enable=rhel-7-server-rh-common-rpms
+subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-openstack-5.0-rpms --enable=rhel-7-server-rh-common-rpms
 yum -y update
 yum -y install openstack-packstack
 
