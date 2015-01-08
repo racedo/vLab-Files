@@ -32,4 +32,15 @@ runcmd:
      PERSISTENT_DHCLIENT="1"
      EOF
    - systemctl restart network
- 
+yum_repos:
+  rhel-x86_64-server-6:
+    baseurl: http://172.16.0.1/repos/rhel-x86_64-server-7/
+    enabled: true
+    failovermethod: priority
+    gpgcheck: true
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat.release
+    name: Red Hat Enterprise Linux $releasever - $basearch
+package_upgrade: true
+packages:
+  - httpd
+  - php 
