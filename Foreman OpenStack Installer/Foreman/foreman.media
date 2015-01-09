@@ -14,7 +14,7 @@ EULA_ko  Packages          RELEASE-NOTES-hi-IN.html  RELEASE-NOTES-pt-BR.html  R
 
 cp -a /tmp/rhel/* /var/www/html/repos/released/rhel/6.5/os/x86_64
 
-# Example with RHEL 7 DVD: http://red.ht/1vBSk5g
+# Example with RHEL 7 DVD: http://red.ht/1w5mLiy
 
 # Use createrepo -g with the comps.xml found in the repo mirrored with reposync
 
