@@ -28,7 +28,7 @@ Request body:
 
 Method: GET
 URL: http://10.0.0.129:35357/v2.0/tenants
-Header: X-Auth-Token: "token_obtained_from_authenticatation_call"
+Header: X-Auth-Token: token_obtained_from_authenticatation_call
 
 
 - Get a 'scoped token' to operate as a tenant (recommended):
@@ -52,5 +52,5 @@ Method: GET
 URL: http://10.0.0.129:9696/v2.0/networks.json
 Header:
 
-X-Auth-Token: "token_obtained_from_authenticatation_call"
-Content-Type: application/json"
+X-Auth-Token: token_obtained_from_authenticatation_call
+Content-Type: application/json
