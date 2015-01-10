@@ -1,3 +1,5 @@
+External networks set up as VXLAN or GRE:
+
 neutron net-create external-net --router:external=True
 neutron subnet-create external-net --name=external-subnet --gateway=192.168.5.2 --disable-dhcp --allocation-pool start=192.168.5.200,end=192.168.5.250 192.168.5.0/24
 neutron net-create admin-net1
@@ -6,3 +8,26 @@ neutron router-create router1
 neutron router-interface-add router1 admin-subnet1
 neutron router-gateway-set router1 external-net
 neutron floatingip-create external-net
+
+Provider networks set up as VLAN or FLAT:
+
+Example using vmnet7 where:
+
+/etc/neutron/plugin.ini:
+[ml2_type_flat]
+flat_networks = vmnet7
+
+/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+network_vlan_ranges = vmnet7
+bridge_mappings = vmnet7:br-eth1
+
+/etc/neutron/dhcp_agent.ini:
+enable_isolated_metadata = true
+
+# ovs-vsctl list-ports br-eth1
+eth1
+
+eth1 is connected to external network 192.168.133.0/24 which has 192.168.133.2 as a gateway and DNS server.
+
+neutron net-create vmnet7 --shared  --provider:network_type flat --provider:physical_network vmnet7
+neutron subnet-create --name flat-provider-subnet --gateway 192.168.133.2 --dns-nameserver 192.168.133.2  --allocation-pool start=192.168.133.100,end=192.168.133.150 vmnet7 192.168.133.0/24
