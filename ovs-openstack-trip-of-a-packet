@@ -1,0 +1,163 @@
+http://docs.openstack.org/admin-guide-cloud/content/under_the_hood_openvswitch.html
+
+0. The instance NIC in the OS is eth0:
+
+- eth0
+
+1. Get instance port ID:
+
+nova list
++--------------------------------------+-----------------------------------------------+---------+------------+-------------+----------------------------------------+
+| ID                                   | Name                                          | Status  | Task State | Power State | Networks                               |
++--------------------------------------+-----------------------------------------------+---------+------------+-------------+----------------------------------------+
+| 1632c218-39a7-4dba-ac3d-30230ece9848 | test_cloud-init                               | ACTIVE  | -          | Running     | private-network=192.168.0.9, 10.0.0.15 |
++--------------------------------------+-----------------------------------------------+---------+------------+-------------+----------------------------------------+
+neutron port-list --device_id 1632c218-39a7-4dba-ac3d-30230ece9848
++--------------------------------------+------+-------------------+------------------------------------------------------------------------------------+
+| id                                   | name | mac_address       | fixed_ips                                                                          |
++--------------------------------------+------+-------------------+------------------------------------------------------------------------------------+
+| da929d53-eb4f-4fb6-825a-22bb60a44e3d |      | fa:16:3e:78:12:38 | {"subnet_id": "c9d8764f-d298-49e7-b236-8f473c222c05", "ip_address": "192.168.0.9"} |
++--------------------------------------+------+-------------------+------------------------------------------------------------------------------------+
+
+- eth0 ->
+
+2. Get first characters of the port ID:
+
+Example:
+
+  from port ID da929d53-eb4f-4fb6-825a-22bb60a44e3d: da929d53
+
+- eth0 ->
+
+3. Get the Linux bridge associated to it and its TAP device:
+
+  # brctl show|grep da929d53
+  qbrda929d53-eb		8000.eea496329f1d	no		qvbda929d53-eb
+  							tapda929d53-eb
+
+- eth0 -> tapda929d53-eb -> qbrda929d53-eb -> qvbda929d53-eb
+
+4. Observe the IPtables rules applied to the TAP device which correspond with the security groups:
+
+ # iptables -S |grep da929d53
+
+4. Get the other end of the veth pair of the qvb interface of the bridge (qbr interface) which is always qvoXXXX
+
+# ip -o a s|grep da929d53
+38: qbrda929d53-eb    inet6 fe80::24b0:3ff:fefb:4238/64 scope link \       valid_lft forever preferred_lft forever
+39: qvoda929d53-eb    inet6 fe80::1c4e:bcff:feda:bbce/64 scope link \       valid_lft forever preferred_lft forever
+40: qvbda929d53-eb    inet6 fe80::eca4:96ff:fe32:9f1d/64 scope link \       valid_lft forever preferred_lft forever
+41: tapda929d53-eb    inet6 fe80::fc16:3eff:fe78:1238/64 scope link \       valid_lft forever preferred_lft forever
+
+ Another way of identifying is is by interface index:
+
+# ethtool -S qvbda929d53-eb
+NIC statistics:
+     peer_ifindex: 39
+# ip -o a|grep -w 39
+39: qvoda929d53-eb    inet6 fe80::1c4e:bcff:feda:bbce/64 scope link \       valid_lft forever preferred_lft forever
+
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb <-> qvoda929d53-eb
+
+5 - Check br-int and how qvoXXX connects the instance to the br-int OVS bridge:
+
+# ovs-vsctl show
+Bridge br-int
+        fail_mode: secure
+        Port "qvoda929d53-eb"
+            tag: 2
+            Interface "qvoda929d53-eb"
+
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb <-> qvoda929d53-eb <-> br-int
+
+6 - Check the network interfaces inside the namespace for the router and dhcp.
+
+The dhcp agent namespace is identified by network id:
+
+# neutron net-list
++--------------------------------------+----------------------+-------------------------------------------------------+
+| id                                   | name                 | subnets                                               |
++--------------------------------------+----------------------+-------------------------------------------------------+
+| 13253134-3c6e-4bd6-b297-ec43f2b24b43 | private-network      | c9d8764f-d298-49e7-b236-8f473c222c05 192.168.0.0/24   |
++--------------------------------------+----------------------+-------------------------------------------------------+
+
+# ip netns|grep 13253134-3c6e-4bd6-b297-ec43f2b24b43
+qdhcp-13253134-3c6e-4bd6-b297-ec43f2b24b43
+
+# ip netns exec qdhcp-13253134-3c6e-4bd6-b297-ec43f2b24b43 ip -o a
+1: lo    inet 127.0.0.1/8 scope host lo\       valid_lft forever preferred_lft forever
+1: lo    inet6 ::1/128 scope host \       valid_lft forever preferred_lft forever
+34: tapece1633d-99    inet 192.168.0.2/24 brd 192.168.0.255 scope global tapece1633d-99\       valid_lft forever preferred_lft forever
+34: tapece1633d-99    inet 169.254.169.254/16 brd 169.254.255.255 scope global tapece1633d-99\       valid_lft forever preferred_lft forever
+34: tapece1633d-99    inet6 fe80::f816:3eff:fe4c:948c/64 scope link \       valid_lft forever preferred_lft forever
+
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb <-> qvoda929d53-eb <-> br-int
+
+7 - Observe how the tap interface in the name space is also a port of br-int with the same tag as the qvoXXX:
+
+    Bridge br-int
+        fail_mode: secure
+        Port "qvoda929d53-eb"
+            tag: 2
+            Interface "qvoda929d53-eb"
+        Port "tapece1633d-99"
+            tag: 2
+            Interface "tapece1633d-99"
+                type: internal
+
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb <-> qvoda929d53-eb <-> br-int <-> tapece1633d-99
+
+8 - Check how the interface in the namespace of the router connected to the instance internal network is also connected to br-int with the same tag:
+
+# neutron router-list
++--------------------------------------+-----------------+-----------------------------------------------------------------------------+
+| id                                   | name            | external_gateway_info                                                       |
++--------------------------------------+-----------------+-----------------------------------------------------------------------------+
+| d05e0abb-6a23-4630-b6bd-91ce297b3fa2 | router-external | {"network_id": "2a055487-d5e4-4c18-9968-c98da81cf096", "enable_snat": true} |
++--------------------------------------+-----------------+-----------------------------------------------------------------------------+
+
+# ip netns |grep d05e0abb-6a23-4630-b6bd-91ce297b3fa2
+qrouter-d05e0abb-6a23-4630-b6bd-91ce297b3fa2
+
+# ip netns exec qrouter-d05e0abb-6a23-4630-b6bd-91ce297b3fa2 ip -o a
+1: lo    inet 127.0.0.1/8 scope host lo\       valid_lft forever preferred_lft forever
+1: lo    inet6 ::1/128 scope host \       valid_lft forever preferred_lft forever
+35: qr-feb6809c-dc    inet 192.168.0.1/24 brd 192.168.0.255 scope global qr-feb6809c-dc\       valid_lft forever preferred_lft forever
+35: qr-feb6809c-dc    inet6 fe80::f816:3eff:fea4:d608/64 scope link \       valid_lft forever preferred_lft forever
+36: qg-33d5de42-e9    inet 10.0.0.10/24 brd 10.0.0.255 scope global qg-33d5de42-e9\       valid_lft forever preferred_lft forever
+36: qg-33d5de42-e9    inet 10.0.0.14/32 brd 10.0.0.14 scope global qg-33d5de42-e9\       valid_lft forever preferred_lft forever
+36: qg-33d5de42-e9    inet 10.0.0.12/32 brd 10.0.0.12 scope global qg-33d5de42-e9\       valid_lft forever preferred_lft forever
+36: qg-33d5de42-e9    inet 10.0.0.15/32 brd 10.0.0.15 scope global qg-33d5de42-e9\       valid_lft forever preferred_lft forever
+36: qg-33d5de42-e9    inet6 fe80::f816:3eff:fe37:bf82/64 scope link \       valid_lft forever preferred_lft forever
+
+# ovs-vsctl show
+    Bridge br-int
+        fail_mode: secure
+        Port "qvoda929d53-eb"
+            tag: 2
+            Interface "qvoda929d53-eb"
+        Port "tapece1633d-99"
+            tag: 2
+            Interface "tapece1633d-99"
+                type: internal
+        Port "qr-feb6809c-dc"
+            tag: 2
+            Interface "qr-feb6809c-dc"
+                type: internal
+
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb <-> qvoda929d53-eb <-> br-int <-> tapece1633d-99 <-> qr-feb6809c-dc
+
+9 - Observe how the qg-XX interface in the router namespace connects us to the outside via the br-ex external OVS bridge and finally to the physical network via eth0 in the host:
+
+# ovs-vsctl show
+    Bridge br-ex
+        Port "eth0"
+            Interface "eth0"
+        Port br-ex
+            Interface br-ex
+                type: internal
+        Port "qg-33d5de42-e9"
+            Interface "qg-33d5de42-e9"
+                type: internal
+
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb <-> qvoda929d53-eb <-> br-int <-> tapece1633d-99 <-> qr-feb6809c-dc <-> qg-33d5de42-e9 <-> br-ex <-> eth0
