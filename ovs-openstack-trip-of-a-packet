@@ -19,27 +19,27 @@ neutron port-list --device_id 1632c218-39a7-4dba-ac3d-30230ece9848
 | da929d53-eb4f-4fb6-825a-22bb60a44e3d |      | fa:16:3e:78:12:38 | {"subnet_id": "c9d8764f-d298-49e7-b236-8f473c222c05", "ip_address": "192.168.0.9"} |
 +--------------------------------------+------+-------------------+------------------------------------------------------------------------------------+
 
-- eth0 ->
+- eth0
 
 2. Get first characters of the port ID:
 
 Example:
 
-  from port ID da929d53-eb4f-4fb6-825a-22bb60a44e3d: da929d53
+  from port ID da929d53-eb4f-4fb6-825a-22bb60a44e3d: da929d53-eb
 
-- eth0 ->
+- eth0
 
 3. Get the Linux bridge associated to it and its TAP device:
 
-  # brctl show|grep da929d53
+  # brctl show|grep da929d53
   qbrda929d53-eb		8000.eea496329f1d	no		qvbda929d53-eb
   							tapda929d53-eb
 
-- eth0 -> tapda929d53-eb -> qbrda929d53-eb -> qvbda929d53-eb
+- eth0 <-> tapda929d53-eb <-> qbrda929d53-eb <-> qvbda929d53-eb
 
 4. Observe the IPtables rules applied to the TAP device which correspond with the security groups:
 
- # iptables -S |grep da929d53
+ # iptables -S |grep da929d53
 
 4. Get the other end of the veth pair of the qvb interface of the bridge (qbr interface) which is always qvoXXXX
 
@@ -49,7 +49,7 @@ Example:
 40: qvbda929d53-eb    inet6 fe80::eca4:96ff:fe32:9f1d/64 scope link \       valid_lft forever preferred_lft forever
 41: tapda929d53-eb    inet6 fe80::fc16:3eff:fe78:1238/64 scope link \       valid_lft forever preferred_lft forever
 
- Another way of identifying is is by interface index:
+ Another way of identifying it is by interface index:
 
 # ethtool -S qvbda929d53-eb
 NIC statistics:
