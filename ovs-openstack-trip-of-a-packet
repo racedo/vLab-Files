@@ -1,3 +1,6 @@
+This document explains the flow of packets in an all-in-one installation of OpenStack from the network interface in the OS of the running instance to the physical network interface used to connect to the external network.
+
+The diagrams in the following URL illustrate what's explained here and expand it to multi host setups:
 http://docs.openstack.org/admin-guide-cloud/content/under_the_hood_openvswitch.html
 
 0. The instance NIC in the OS is eth0:
