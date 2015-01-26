@@ -33,10 +33,9 @@ Then, in the node with the highest seqno:
     
     systemctl start mariadb
 
-5. Kill mysqld and mysqld_safe in the first node (step 2.) and start it with systemd:
+5. Stop mysqld and mysqld_safe in the first node (step 2.) and start it with systemd:
 
-    killall -9 mysqld
-    killall -9 mysqld_safe
+    mysqladmin shutdown
     systemctl start mariadb
 
 6. Cleanup mysqld failures in Pacemaker (Pacemaker uses mysqld service name in with systemd):
