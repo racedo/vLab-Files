@@ -24,9 +24,9 @@ Then, in the node with the highest seqno:
 
     mysqld_safe --wsrep-new-cluster
     
-3. Log into mysql and do this (probably redundant with step 2.):
+3. Log into mysql and set "pc.bootstrap=true":
 
-    mysql -u root -p
+    mysql
     set global wsrep_provider_options="pc.bootstrap=true";
 
 4. In the other two nodes start mariadb/mysqld (mysqld is a symlink to mariadb systemd init script) 
