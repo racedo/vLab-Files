@@ -1,0 +1,17 @@
+Get info of a host in foreman and a list of the parameteres that can be used:
+
+curl -s -u $foreman_username:$foreman_password http://$foreman_host/api/v2/hosts/$hostname/  | python -mjson.tool
+
+Change the name of a host in Foreman:
+
+#!/bin/bash
+
+hostname=$1
+new_hostname=$2
+foreman_host=osp-installer-a2.vm.lab
+foreman_username=admin
+foreman_password=password
+json='{"name":"'$new_hostname'","overwrite":"true"}'
+
+curl -s -u $foreman_username:$foreman_password -H "Accept: application/json" -H "Content-type: application/json" -X PUT -d $json http://$foreman_host/api/v2/hosts/$hostname
+
