@@ -9,8 +9,10 @@ pcs resource enable "resource_id"
 pcs resource disable "resource_id"
 pcs resource cleanup "resource_id"
 pcs property set maintenance-mode=true
+pcs cluster standby nodeX
+pcs cluster unstandby nodeX
 pcs cluster standby --all
-pcs unstandby --all
+pcs cluster unstandby --all
 
 Fencing: 
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/High_Availability_Add-On_Reference/ch-fencing-HAAR.html
