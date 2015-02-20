@@ -17,8 +17,8 @@ LimitNOFILE=infinity
 LimitMEMLOCK=infinity
 
 systemctl daemon-reload
-systemctl restart mariadb
-pcs resource cleanup mysqld
+systemctl restart rabbitmq-server
+pcs resource cleanup rabbitmq-server
 
 We would enable hipe compile as per https://www.rabbitmq.com/configure.html but there's an outstanding bug:
 https://bugzilla.redhat.com/show_bug.cgi?id=1153129
@@ -35,6 +35,10 @@ LimitMEMLOCK=infinity
 /etc/my.cnf.d/server.cnf
 open-files-limit   = 10000
 max_connections    = 10000
+
+systemctl daemon-reload
+systemctl restart mariadb
+pcs resource cleanup mysqld
 
 3. Nova:
 
