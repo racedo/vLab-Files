@@ -1,0 +1,53 @@
+This should be included in the Staypuft Puppet config as defaults in Foreman:
+
+Controllers:
+============
+
+1. RabbitMQ:
+
+Note, I checked in /proc/$rabbitmq_pid/limits and that was already "unlimited":
+Max open files            65535                65535                files
+
+In any case, it can be a placeholder for future tunables:
+
+/etc/systemd/system/rabbitmq-server.service.d/limits.conf
+
+[Service]
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+
+systemctl daemon-reload
+systemctl restart mariadb
+pcs resource cleanup mysqld
+
+We would enable hipe compile as per https://www.rabbitmq.com/configure.html but there's an outstanding bug:
+https://bugzilla.redhat.com/show_bug.cgi?id=1153129
+
+If needed disable SELinux and enable it in the controllers.
+
+2. Mariadb:
+
+/etc/systemd/system/mariadb.service.d/limits.conf
+[Service]
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+
+/etc/my.cnf.d/server.cnf
+open-files-limit   = 10000
+max_connections    = 10000
+
+3. Nova:
+
+/etc/nova/nova.conf:
+
+osapi_max_limit=10000
+osapi_compute_workers=32
+
+4. Neutron:
+
+As many threads as cores available:
+
+/etc/neutron/neutron.conf
+api_workers =16
+
+Note that other services already have a default of 16 workers
