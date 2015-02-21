@@ -1,0 +1,8 @@
+rabbitmqctl cluster_status
+rabbitmqctl report
+rabbitmqctl list_queues | grep -vw 0
+rabbitmqctl list_policies
+
+# Rejoin a cluster: WARNING, NOT FULLY QAed!
+rm -rf /var/lib/rabbitmq/mnesia/
+systemctl restart rabbitmq-server
