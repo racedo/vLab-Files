@@ -1,6 +1,6 @@
 # 1. Register to RHN with subscription-manager register
 # 2. Subscribe to the channels to be synchronised
-# 3. yum install reposync createrepo
+# 3. yum install yum-utils createrepo
 
 reposync -q -d -n -p /var/www/html/repos/ -r rhel-7-server-rpms
 createrepo /var/www/html/repos/rhel-7-server-rpms
