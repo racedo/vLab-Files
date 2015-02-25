@@ -1,3 +1,11 @@
+RHEL 7 OSP 6 (Channels required by the OSP Installer)
+=====================================================
+subscription-manager register --auto-attach
+subscription-manager repos --disable=*
+subscription-manager repos --enable=rhel-7-server-rpms  --enable=rhel-7-server-openstack-6.0-installer-rpms --enable=rhel-server-rhscl-7-rpms
+
+yum install rhel-osp-installer
+
 RHEL 7 OSP 5 (Channels required by OpenStack nodes)
 ===================================================
 subscription-manager register --auto-attach
@@ -14,7 +22,7 @@ yum -y update
 yum -y install openstack-packstack
 
 RHEL 6.6 OSP 5 (Staypuft A2 / Foreman rhel-osp-installer)
-======================================================
+=========================================================
 
 # Channels needed for the Installer: http://red.ht/1vBReqa
 # Channels needed if synching: subscription-manager repos --enable=rhel-6-server-openstack-foreman-rpms --enable=rhel-6-server-rpms --enable=rhel-6-server-rh-common-rpms --enable=rhel-6-server-openstack-5.0-rpms
@@ -28,27 +36,12 @@ yum -y install rhel-osp-installer
 RHEL 6.5 OSP 4
 ==============
 
-# If using Subscription Manager:
+# If using Subscription Manager:
 
 subscription-manager register --auto-attach
 subscription-manager repos --disable=*
 subscription-manager repos --enable=rhel-6-server-rpms --enable=rhel-6-server-rh-common-rpms --enable=rhel-6-server-openstack-4.0-rpms --enable=rhel-lb-for-rhel-6-server-rpms --enable=rhel-6-server-optional-rpms
 
-# If using RHN Classic:
-
-rhn_register
-rhn-channel --add --channel=rhel-x86_64-server-6-rh-1
-rhn-channel --add --channel=rhel-x86_64-server-6-ost-4
 
 yum -y update
 yum -y install openstack-foreman-installer dhcp foreman-selinux foreman-sqlite
-
-CentOS 6.5 RDO
-==============
-yum install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
-yum install http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/rdo-release-icehouse-3.noarch.rpm
-
-#### Only if using foreman 1.5 ####
-yum install centos-release- 
-yum install scl-utils
-#### Only if using foreman 1.5 ####
