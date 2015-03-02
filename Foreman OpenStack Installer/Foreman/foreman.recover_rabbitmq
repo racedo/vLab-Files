@@ -9,3 +9,6 @@ scp -p /var/lib/rabbitmq/.erlang.cookie controller3.vm.lab:/var/lib/rabbitmq/
 # Set the HA Policy (https://www.rabbitmq.com/ha.html)
 rabbitmqctl set_policy ha-all "^ha\." '{"ha-mode":"all"}
 rabbitmqctl cluster_status
+
+# Clean up the resource in pacemaker
+pcs resource cleanup rabbitmq-server
