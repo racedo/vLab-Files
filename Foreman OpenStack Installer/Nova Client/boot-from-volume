@@ -1,0 +1,10 @@
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/End_User_Guide/cli_launch_instances.html#boot_from_volume
+
+# Create volume from image and boot instance on a compute node
+
+nova boot --flavor m1.small --nic net-id=$net-id --block-device source=image,id=$image-id,dest=volume,size=1,shutdown=preserve,bootindex=0 --availability-zone=nova:$compute_node_hostname instance_on_volume1
+
+
+# Boot from an existing volume
+
+nova boot --flavor m1.small --nic net-id=$ned-id --block-device source=volume,id=$volume_id,dest=volume,shutdown=preserve,bootindex=0 --availability-zone=nova:$compute_node_hostname instance_on_volume2
