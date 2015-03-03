@@ -1,0 +1,51 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Provision a base OS instance
+
+parameters:
+  KeyName:
+    description: Name of an existing SSH keypair to inject into the instance
+    type: string
+    constraints:
+      - length: { min: 1, max: 255 }
+        description: Key name must be between 1 and 255 characters
+      - allowed_pattern: "[\\x20-\\x7E]*"
+        description: Key name can contain only ASCII characters
+  FlavorSize:
+    description: The flavor required for the instance
+    type: string
+    default: "m1.small"
+    constraints:
+      - allowed_values: [m1.tiny, m1.small, m1.medium, m1.large]
+  TemplateName:
+    description: The name of a template to deploy
+    type: string
+    default: "cirros-0.3.3-x86_64-raw"
+  PrivateNetID:
+    type: string
+    description: Private Network ID (From neutron net-list)
+  PrivateSubnetID:
+    type: string
+    description: Private Subnet ID (From neutron subnet-list)
+  InstanceCount:
+    type: number
+    description: Number of instances to deploy
+
+resources:
+  compute_instances:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: InstanceCount }
+      resource_def:
+          type: OS::Nova::Server
+          properties:
+            flavor: { get_param: FlavorSize }
+            image: { get_param: TemplateName }
+            key_name: { get_param: KeyName }
+            networks:
+              - network: { get_param: PrivateNetID }
+outputs:
+  compute_resources:
+    description: The actual compute instance details
+    value: { get_attr: [compute_instances, refs]}
