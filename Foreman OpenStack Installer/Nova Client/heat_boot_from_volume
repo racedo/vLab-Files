@@ -1,0 +1,78 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Provision a base OS instance
+
+# Set parameters for input and stack provision time
+parameters:
+  KeyName:
+    description: Name of an existing SSH keypair to inject into the instance
+    type: string
+    constraints:
+      - length: { min: 1, max: 255 }
+        description: Key name must be between 1 and 255 characters
+      - allowed_pattern: "[\\x20-\\x7E]*"
+        description: Key name can contain only ASCII characters
+  FlavorSize:
+    description: The flavor required for the instance
+    type: string
+    default: "m1.small"
+    constraints:
+      - allowed_values: [m1.tiny, m1.small, m1.medium, m1.large]
+  TemplateName:
+    description: The name of a template to deploy
+    type: string
+    default: "cirros-0.3.3-x86_64-raw"
+  PrivateNetID:
+    type: string
+    description: Private Network ID (From neutron net-list)
+  PrivateSubnetID:
+    type: string
+    description: Private Subnet ID (From neutron subnet-list)
+
+# When OFC gives us Provider Networks then set it up here and uncomment public port below
+#  PublicNetID:
+#    type: string
+#    description: Public Network ID (From neutron net-list)
+resources:
+  # Create an Instance
+  instance0:
+   type: OS::Nova::Server
+   depends_on: volume0
+   properties:
+      flavor: { get_param: FlavorSize }
+#      image: { get_param: TemplateName }
+      key_name: { get_param: KeyName }
+      networks:
+        - port: { get_resource: instance0_port0 }
+      block_device_mapping: [{ device_name: "vda", volume_id: { get_resource : volume0 }, delete_on_termination : "true" }]
+      availability_zone: "nova"
+  # Create a Network Port for that instance
+  instance0_port0:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: PrivateNetID }
+      fixed_ips:
+        - subnet_id: { get_param: PrivateSubnetID }
+  # Associate a floating IP to that instance
+#  instance0_public:
+#    type: OS::Neutron::FloatingIP
+#    properties:
+#      floating_network_id: { get_param: PublicNetID }
+#      port_id: { get_resource: instance0_port0 }
+
+  volume0:
+    type: OS::Cinder::Volume
+    properties:
+      image : { get_param: TemplateName }
+      size  : 10
+      volume_type : gpfs
+
+outputs:
+  # Output our fixed and floating IPs - This will be shown in 'heat stack-show'
+  instance0_private_ip:
+    description: IP address of instance0 in private network
+    value: { get_attr: [ instance0, first_address ] }
+#  instance0_public_ip:
+#    description: Floating IP address of instance0 in public network
+#    value: { get_attr: [ instance0_public, floating_ip_address ] }
