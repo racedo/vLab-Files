@@ -8,6 +8,8 @@
 # 3. Install required packages
 #    yum install yum-utils createrepo
 
+yum clean all
+
 reposync -q -d -n -p /var/www/html/repos/ -r rhel-7-server-rpms
 createrepo /var/www/html/repos/rhel-7-server-rpms
 
