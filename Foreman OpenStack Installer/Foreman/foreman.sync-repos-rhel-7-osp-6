@@ -1,5 +1,5 @@
 # 1. Register to RHN with subscription-manager register
-#    sybscription-manager register --auto-attach
+#    subscription-manager register --auto-attach
 
 # 2. Subscribe to the channels to be synchronised:
 #    subscription-manager repos --disable=*
