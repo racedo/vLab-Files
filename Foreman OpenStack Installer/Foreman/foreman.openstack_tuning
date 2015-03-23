@@ -20,6 +20,17 @@ systemctl daemon-reload
 systemctl restart rabbitmq-server
 pcs resource cleanup rabbitmq-server
 
+RabbitMQ also has a process that honors limits.conf:
+
+root     25613  0.0  0.0  76584  2112 ?        S    Mar21   0:00 su rabbitmq -s /bin/sh -c /usr/lib/rabbitmq/bin/rabbitmq-server
+
+That requires these entries in /etc/security/limits.conf
+
+rabbitmq  soft nofile 65535
+rabbitmq  hard nofile 65535
+
+And a reboot of the hosts.
+
 We would enable hipe compile as per https://www.rabbitmq.com/configure.html but there's an outstanding bug:
 https://bugzilla.redhat.com/show_bug.cgi?id=1153129
 
