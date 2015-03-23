@@ -13,6 +13,8 @@ pcs cluster standby nodeX
 pcs cluster unstandby nodeX
 pcs cluster standby --all
 pcs cluster unstandby --all
+pcs cluster stop --all
+pcs cluster start --all
 
 Fencing: 
 https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/High_Availability_Add-On_Reference/ch-fencing-HAAR.html
