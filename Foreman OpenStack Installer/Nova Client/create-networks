@@ -14,6 +14,9 @@ Provider networks set up as VLAN or FLAT:
 Example using vmnet7 where:
 
 /etc/neutron/plugin.ini:
+[ml2]
+type_drivers = vxlan,flat # make sure flat and/or vlan is specified as we need it later for the "provider:network_type"
+
 [ml2_type_flat]
 flat_networks = vmnet7
 
