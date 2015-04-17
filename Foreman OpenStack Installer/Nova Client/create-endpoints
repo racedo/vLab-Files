@@ -3,7 +3,6 @@
 # In RegionOne
 
 keystone endpoint-create --region RegionTwo --publicurl http://10.0.0.20:5000/v2.0 --internalurl http://10.0.0.20:5000/v2.0 --adminurl http://10.0.0.20:35357/v2.0 --service keystone
-keystone endpoint-create --region RegionTwo --publicurl http://10.0.0.20:8776/v2/%(tenant_id)s --internalurl http://10.0.0.20:8776/v2/%(tenant_id)s --adminurl http://10.0.0.20:8776/v2/%(tenant_id)s --service cinderv2
 keystone endpoint-create --region RegionTwo --publicurl "http://10.0.0.20:8776/v2/%(tenant_id)s" --internalurl "http://10.0.0.20:8776/v2/%(tenant_id)s" --adminurl "http://10.0.0.20:8776/v2/%(tenant_id)s" --service cinderv2
 keystone endpoint-create --region RegionTwo --publicurl http://10.0.0.20:8777 --internalurl http://10.0.0.20:8777 --adminurl http://10.0.0.20:8777 --service ceilometer
 keystone endpoint-create --region RegionTwo --publicurl "http://10.0.0.20:8080/v1/AUTH_%(tenant_id)s" --internalurl "http://10.0.0.20:8080/v1/AUTH_%(tenant_id)s" --adminurl http://10.0.0.20:8080/ --service swift
@@ -17,7 +16,6 @@ keystone endpoint-create --region RegionTwo --publicurl "http://10.0.0.20:8774/v
 # In RegionTwo
 
 keystone endpoint-create --region RegionOne --publicurl http://10.0.0.10:5000/v2.0 --internalurl http://10.0.0.10:5000/v2.0 --adminurl http://10.0.0.10:35357/v2.0 --service keystone
-keystone endpoint-create --region RegionOne --publicurl http://10.0.0.10:8776/v2/%(tenant_id)s --internalurl http://10.0.0.10:8776/v2/%(tenant_id)s --adminurl http://10.0.0.10:8776/v2/%(tenant_id)s --service cinderv2
 keystone endpoint-create --region RegionOne --publicurl "http://10.0.0.10:8776/v2/%(tenant_id)s" --internalurl "http://10.0.0.10:8776/v2/%(tenant_id)s" --adminurl "http://10.0.0.10:8776/v2/%(tenant_id)s" --service cinderv2
 keystone endpoint-create --region RegionOne --publicurl http://10.0.0.10:8777 --internalurl http://10.0.0.10:8777 --adminurl http://10.0.0.10:8777 --service ceilometer
 keystone endpoint-create --region RegionOne --publicurl "http://10.0.0.10:8080/v1/AUTH_%(tenant_id)s" --internalurl "http://10.0.0.10:8080/v1/AUTH_%(tenant_id)s" --adminurl http://10.0.0.10:8080/ --service swift
