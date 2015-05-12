@@ -1,10 +1,10 @@
-# This shows how to install the Ceph Calamari Admin node.
+# How to Install Inktank Ceph Enterprise monitors and OSDs in a lab environment.
 # Based on: https://access.redhat.com/beta/documentation/en/red-hat-ceph-storage-123-installation-guide-for-rhel-x86-64/installation-guide-for-rhel-x86-64
 #
 # To purge config: ceph-deploy purgedata node(s) and ceph-deploy purge node(s): 
 # https://access.redhat.com/beta/documentation/en/red-hat-ceph-storage-123-installation-guide-for-rhel-x86-64/chapter-6-create-a-cluster
 # 
-# Example for a lab with 3 servers (VMs): 
+# Example for a lab with 3 servers (VMs) installed with OSP 6 from the RHEL OSP Installer: 
 #
 #   controller.vm.lab: ceph-mon and 2 OSDs
 #   compute.vm.lab: ceph-mon, 2 OSDs and Ceph admin node
