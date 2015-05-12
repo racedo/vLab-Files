@@ -1,0 +1,83 @@
+# This shows how to install the Ceph Calamari Admin node.
+# Based on: https://access.redhat.com/beta/documentation/en/red-hat-ceph-storage-123-installation-guide-for-rhel-x86-64/installation-guide-for-rhel-x86-64
+# To purge config: ceph-deploy purgedata node(s) and ceph-deploy purge node(s): 
+# https://access.redhat.com/beta/documentation/en/red-hat-ceph-storage-123-installation-guide-for-rhel-x86-64/chapter-6-create-a-cluster
+# 
+# Example for a lab with 3 servers (VMs): controller.vm.lab, compute.vm.lab (also acting as Ceph admin node) and ceph1.vm.lab
+#
+
+# First add to /etc/sysconfig/iptables in the relevant section:
+
+# -A INPUT -p tcp -m multiport --dports 80 -m comment --comment "Ceph Calamari" -j ACCEPT
+# -A INPUT -p tcp -m multiport --dports 2003 -m comment --comment "Ceph" -j ACCEPT
+# -A INPUT -p tcp -m multiport --dports 4505:4506 -m comment --comment "Ceph" -j ACCEPT
+# -A INPUT -p tcp -m multiport --dports 6789 -m comment --comment "Ceph monitor" -j ACCEPT
+# -A INPUT -p tcp -m multiport --dports 6800:6811 -m comment --comment "Ceph OSDs" -j ACCEPT
+
+subscription-manager repos \
+      --enable rhel-ha-for-rhel-7-server-rpms \
+      --enable rhel-7-server-rpms \
+      --enable rhel-7-server-rh-common-rpms \
+      --enable rhel-7-server-openstack-6.0-rpms \
+      --enable rhel-server-rhscl-7-rpms \
+      --enable rhel-7-server-openstack-6.0-installer-rpms \
+      --enable rhel-7-server-optional-rpms \
+      --enable rhel-7-server-rhceph-1.2-osd-rpms \
+      --enable rhel-7-server-rhceph-1.2-mon-rpms \
+      --enable rhel-7-server-rhceph-1.2-calamari-rpms \
+      --enable rhel-7-server-rhceph-1.2-installer-rpms
+
+mount -o loop rhceph-1.2.3-rhel-7-x86_64.iso /mnt/
+cp /mnt/RHCeph-Calamari-1.2-x86_64-c1e8ca3b6c57-285.pem /etc/pki/product/285.pem
+cp /mnt/RHCeph-Installer-1.2-x86_64-8ad6befe003d-281.pem /etc/pki/product/281.pem
+cp /mnt/RHCeph-MON-1.2-x86_64-d8afd76a547b-286.pem /etc/pki/product/286.pem
+cp /mnt/RHCeph-OSD-1.2-x86_64-25019bf09fe9-288.pem /etc/pki/product/288.pem
+yum install /mnt/ice_setup-0.2.2-1.el7cp.noarch.rpm
+
+mkdir ceph-config
+cd ceph-config/
+
+ice_setup -d /mnt/
+
+calamari-ctl initialize
+
+# Gets config from OSP Installer:
+
+ceph-deploy config pull controller.vm.lab
+
+# Initiate the Ceph monitor nodes:
+
+ceph-deploy new controller.vm.lab ceph1.vm.lab compute1.vm.lab
+
+# Add all of this to the ceph.conf file: https://access.redhat.com/beta/documentation/en/red-hat-ceph-storage-123-installation-guide-for-rhel-x86-64/chapter-6-create-a-cluster
+
+# public_network = 10.0.0.0/24
+# cluster_network = 10.0.0.0/24
+
+# Make sure there's enough space (MB), by default it's a partition in the disk provided for OSDs
+# osd_journal_size = 1000
+
+# osd_pool_default_size = 3
+# osd_pool_default_min_size = 2
+
+# set to 512 for more than 5 OSDs
+# osd_pool_default_pg_num = 512
+# osd_pool_default_pgp_num = 512
+
+# Install ceph-mon on the nodes:
+
+ceph-deploy install ceph1.vm.lab controller.vm.lab compute1.vm.lab
+ceph-deploy --overwrite-conf mon create-initial
+
+ceph-deploy calamari connect ceph1.vm.lab controller.vm.lab compute1.vm.lab
+ceph-deploy --overwrite-conf admin compute1.vm.lab
+
+# Destroy existing partition table and content
+ceph-deploy disk zap ceph1:sdb ceph1:sdc controller:sdb controller:sdc compute1:sdb compute1:sdc
+
+# Warning, pending double-checking relation with osd_pool_default_size:
+# "to achieve an active + clean state, you must add as many OSDs as the value of osd pool default size = <n> from your Ceph configuration file.":
+# https://access.redhat.com/beta/documentation/en/red-hat-ceph-storage-123-installation-guide-for-rhel-x86-64/chapter-11-add-osds
+
+ceph-deploy osd prepare ceph1:sdb ceph1:sdc controller:sdb controller:sdc compute1:sdb compute1:sdc
+ceph-deploy osd activate ceph1:sdb ceph1:sdc controller:sdb controller:sdc compute1:sdb compute1:sdc
