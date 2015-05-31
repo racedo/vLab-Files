@@ -32,6 +32,8 @@
 #      --enable rhel-7-server-rhceph-1.2-calamari-rpms \
 #      --enable rhel-7-server-rhceph-1.2-installer-rpms
 
+1. Set up Ceph
+==============
 # Download the Ceph iso from https://access.redhat.com/products/red-hat-ceph-storage/get-started
 # 
 # From the node Ceph admin node (compute1.vm.lab in this example)
@@ -95,3 +97,76 @@ ceph-deploy disk zap ceph1:sdb ceph1:sdc controller:sdb controller:sdc compute1:
 
 ceph-deploy osd prepare ceph1:sdb ceph1:sdc controller:sdb controller:sdc compute1:sdb compute1:sdc
 ceph-deploy osd activate ceph1:sdb ceph1:sdc controller:sdb controller:sdc compute1:sdb compute1:sdc
+
+2. Set up Glance, Cinder and Compute
+====================================
+
+# Create the pools for Glance and Cinder. 512 is the same value as above for 5 or more OSDs
+
+ceph osd pool create images 512
+ceph osd pool create volumes 512
+
+# Get the keys and copy them to the controller. In client.volumes "volumes" is the value for rbd_user in cinder.conf or rbd_store_user in glance-api.conf
+# Note if things don't work add this to ceph.conf and push the file to all the nodes:
+#
+# [client.images]
+# keyring = /etc/ceph/ceph.client.images.keyring
+#
+# [client.volumes]
+# keyring = /etc/ceph/ceph.client.volumes.keyring
+
+ceph auth get-or-create client.volumes mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images'
+ceph auth get-or-create client.images mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=images'
+
+ceph auth get-or-create client.volumes | ssh controller tee /etc/ceph/ceph.client.volumes.keyring
+ceph auth get-or-create client.images | ssh controller tee /etc/ceph/ceph.client.images.keyring
+
+# Make sure both have the right permissions on the pools:
+
+ceph auth list
+
+# Set up Glance: /etc/glance/glance-api.conf
+
+[glance_store]
+stores = rbd
+default_store = rbd
+rbd_store_pool = images
+rbd_store_user = images
+rbd_store_ceph_conf = /etc/ceph/ceph.conf
+
+# restart glance
+systemctl restart openstack-glance-api
+
+# Set up Cinder: /etc/cinder/cinder.conf (note the uuid comes from the one set in the compute node below the OSP Installer may have done that for us)
+
+rbd_pool=volumes
+rbd_user=volumes
+rbd_ceph_conf=/etc/ceph/ceph.conf
+rbd_flatten_volume_from_snapshot=False
+rbd_secret_uuid=f1cc273e-63df-48ab-a1ab-f5d2f1d1cd1e
+rbd_max_clone_depth=5
+
+# Set up Compute
+
+ceph auth get-or-create client.volumes | ssh compute1 tee /etc/ceph/ceph.client.volumes.keyring
+[client.volumes]
+        key = AQBBAVJVCB8QHhAARtkAYWObm09HLGpB8EFM6Q==
+
+ssh compute1
+grep -w key /etc/ceph/ceph.client.volumes.keyring|awk '{print $3}' > /etc/ceph/volumes.key
+
+virsh secret-define --file secret.xml
+
+# Using the UUID from the above command:
+virsh secret-set-value --secret f1cc273e-63df-48ab-a1ab-f5d2f1d1cd1e  --base64 `cat /etc/ceph/volumes.key`
+
+# Make sure that the settings for Ceph are correct in /etc/nova/nova.conf
+
+rbd_user=volumes
+libvirt_images_rbd_ceph_conf=/etc/ceph/ceph.conf
+libvirt_images_type=rbd
+libvirt_images_rbd_pool=images
+rbd_secret_uuid=f1cc273e-63df-48ab-a1ab-f5d2f1d1cd1e
+
+# Restart the service
+systemctl restart openstack-nova-compute
