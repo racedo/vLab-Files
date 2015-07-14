@@ -1,0 +1,88 @@
+We need to configure both HAProxy and horizon itself. We need to create a certificate for Horizon as well.
+
+The Horizon configuration will need to be as follows:
+
+/etc/httpd/conf.d/15-horizon_vhost.conf
+
+<VirtualHost *:80>
+  ServerName cmhorizon-lab15ch-1.mgmt.sccloudpoc.net
+  ServerAlias horizon-lab15ch.mgmt.sccloudpoc.net
+  ServerAlias 172.17.142.231
+  <IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+  </IfModule>
+  <IfModule !mod_rewrite.c>
+    RedirectPermanent / https://horizon-lab15ch.mgmt.sccloudpoc.net
+  </IfModule>
+</VirtualHost>
+
+/etc/httpd/conf.d/15-horizon_ssl_vhost.conf
+
+<VirtualHost *:443>
+  ServerName cmhorizon-lab15ch-1.mgmt.sccloudpoc.net
+  SSLEngine On
+  ## SSL cert files
+  SSLCertificateFile /etc/httpd/SSL/<certFile>
+  SSLCACertificateFile /etc/httpd/SSL/<CAcertFile>
+  SSLCertificateKeyFile /etc/httpd/SSL/<keyfile>
+  ## Improvement for MSIE
+  SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown
+
+  ## Vhost docroot
+  DocumentRoot "/var/www/"
+  ## Alias declarations for resources outside the DocumentRoot
+  Alias /static "/usr/share/openstack-dashboard/static"
+
+  ## Directories, there should at least be a declaration for /var/www/
+
+  <Directory "/var/www/">
+    Options Indexes FollowSymLinks MultiViews
+    AllowOverride None
+    Require all granted
+  </Directory>
+
+  ## Logging
+  ErrorLog "/var/log/httpd/horizon_error.log"
+  ServerSignature Off
+  CustomLog "/var/log/httpd/horizon_access.log" combined
+
+  ## RedirectMatch rules
+  RedirectMatch permanent  ^/$ /dashboard
+
+  ## Server aliases
+  ServerAlias horizon-lab15ch.mgmt.sccloudpoc.net
+  ServerAlias 172.17.142.231
+  WSGIDaemonProcess dashboard group=apache processes=3 threads=10 user=apache
+  WSGIProcessGroup dashboard
+  WSGIScriptAlias /dashboard "/usr/share/openstack-dashboard/openstack_dashboard/wsgi/django.wsgi"
+</VirtualHost>
+
+In /etc/openstack-dashboard/local_settings
+USE_SSL = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+
+In HAPROXY include this new configuration:
+
+listen horizon
+  bind 172.17.142.241:443 ssl crt /etc/haproxy/certs.d/horizon.pem
+  bind 172.17.142.242:443 ssl crt /etc/haproxy/certs.d/horizon.pem
+  bind 172.17.142.243:443 ssl crt /etc/haproxy/certs.d/horizon.pem
+  mode http
+  balance roundrobin
+  cookie SERVERID insert indirect nocache
+  timeout client 180s
+  timeout server 180s
+  server horizon-1 172.17.142.80:443 cookie horizon-1 check inter 1s on-marked-down shutdown-sessions ssl verify none
+  server horizon-2 172.17.142.81:443 cookie horizon-2 check inter 1s on-marked-down shutdown-sessions ssl verify none
+  server horizon-3 172.17.142.82:443 cookie horizon-3 check inter 1s on-marked-down shutdown-sessions ssl verify none
+
+listen horizon-redirect
+  bind 172.17.142.241:80
+  bind 172.17.142.242:80
+  bind 172.17.142.243:80
+  mode http
+  redirect scheme https if !{ ssl_fc }
