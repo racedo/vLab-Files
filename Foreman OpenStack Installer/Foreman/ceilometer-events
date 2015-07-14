@@ -1,0 +1,89 @@
+This must be set to enable ceilometer events (packstack and staypuft leave it to false by default):
+
+/etc/ceilometer/ceilometer.conf
+store_events=True
+
+You can then do things like this:
+
+ceilometer event-list -q 'user_id=0c492f6c37b54d89830f0414ee30ce2b'
++--------------------------------------+---------------------------------+----------------------------+----------------------------------------------------------------------------+
+| Message ID                           | Event Type                      | Generated                  | Traits                                                                     |
++--------------------------------------+---------------------------------+----------------------------+----------------------------------------------------------------------------+
+| 556dab41-9a9f-4189-9931-42e19f8341ce | compute.instance.shutdown.end   | 2015-07-14T16:31:59.652000 | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |       name       |   type   |                  value                   | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |      state       |  string  |                  active                  | |
+|                                      |                                 |                            | |     root_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |     user_id      |  string  |     0c492f6c37b54d89830f0414ee30ce2b     | |
+|                                      |                                 |                            | |     service      |  string  |                 compute                  | |
+|                                      |                                 |                            | |     disk_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |  instance_type   |  string  |                 m1.tiny                  | |
+|                                      |                                 |                            | |    tenant_id     |  string  |     29c9874c47324c148df4195d8fe1ceb7     | |
+|                                      |                                 |                            | |   ephemeral_gb   | integer  |                    0                     | |
+|                                      |                                 |                            | | instance_type_id | integer  |                    2                     | |
+|                                      |                                 |                            | |      vcpus       | integer  |                    1                     | |
+|                                      |                                 |                            | |    memory_mb     | integer  |                   512                    | |
+|                                      |                                 |                            | |   instance_id    |  string  |   d3f70f25-fbff-4ab8-a22c-25a0d3d544c7   | |
+|                                      |                                 |                            | |       host       |  string  |            all-in-one.vm.lab             | |
+|                                      |                                 |                            | |    request_id    |  string  | req-39973224-e232-4d2e-aac8-5aedcfa47114 | |
+|                                      |                                 |                            | |   launched_at    | datetime |           2015-07-14T16:26:39            | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+| 68b361f9-9f8c-4ff0-8da4-0ae1ff217db6 | compute.instance.delete.start   | 2015-07-14T16:31:58.577000 | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |       name       |   type   |                  value                   | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |      state       |  string  |                  active                  | |
+|                                      |                                 |                            | |     root_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |     user_id      |  string  |     0c492f6c37b54d89830f0414ee30ce2b     | |
+|                                      |                                 |                            | |     service      |  string  |                 compute                  | |
+|                                      |                                 |                            | |     disk_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |  instance_type   |  string  |                 m1.tiny                  | |
+|                                      |                                 |                            | |    tenant_id     |  string  |     29c9874c47324c148df4195d8fe1ceb7     | |
+|                                      |                                 |                            | |   ephemeral_gb   | integer  |                    0                     | |
+|                                      |                                 |                            | | instance_type_id | integer  |                    2                     | |
+|                                      |                                 |                            | |      vcpus       | integer  |                    1                     | |
+|                                      |                                 |                            | |    memory_mb     | integer  |                   512                    | |
+|                                      |                                 |                            | |   instance_id    |  string  |   d3f70f25-fbff-4ab8-a22c-25a0d3d544c7   | |
+|                                      |                                 |                            | |       host       |  string  |            all-in-one.vm.lab             | |
+|                                      |                                 |                            | |    request_id    |  string  | req-39973224-e232-4d2e-aac8-5aedcfa47114 | |
+|                                      |                                 |                            | |   launched_at    | datetime |           2015-07-14T16:26:39            | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+| bbb8fb28-ff56-4c32-b328-fea8be17b58a | compute.instance.shutdown.start | 2015-07-14T16:31:58.589000 | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |       name       |   type   |                  value                   | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |      state       |  string  |                  active                  | |
+|                                      |                                 |                            | |     root_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |     user_id      |  string  |     0c492f6c37b54d89830f0414ee30ce2b     | |
+|                                      |                                 |                            | |     service      |  string  |                 compute                  | |
+|                                      |                                 |                            | |     disk_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |  instance_type   |  string  |                 m1.tiny                  | |
+|                                      |                                 |                            | |    tenant_id     |  string  |     29c9874c47324c148df4195d8fe1ceb7     | |
+|                                      |                                 |                            | |   ephemeral_gb   | integer  |                    0                     | |
+|                                      |                                 |                            | | instance_type_id | integer  |                    2                     | |
+|                                      |                                 |                            | |      vcpus       | integer  |                    1                     | |
+|                                      |                                 |                            | |    memory_mb     | integer  |                   512                    | |
+|                                      |                                 |                            | |   instance_id    |  string  |   d3f70f25-fbff-4ab8-a22c-25a0d3d544c7   | |
+|                                      |                                 |                            | |       host       |  string  |            all-in-one.vm.lab             | |
+|                                      |                                 |                            | |    request_id    |  string  | req-39973224-e232-4d2e-aac8-5aedcfa47114 | |
+|                                      |                                 |                            | |   launched_at    | datetime |           2015-07-14T16:26:39            | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+| d2b9377b-92fc-4eec-ad17-8a51604914e0 | compute.instance.delete.end     | 2015-07-14T16:31:59.900000 | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |       name       |   type   |                  value                   | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
+|                                      |                                 |                            | |      state       |  string  |                 deleted                  | |
+|                                      |                                 |                            | |     root_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |     user_id      |  string  |     0c492f6c37b54d89830f0414ee30ce2b     | |
+|                                      |                                 |                            | |     service      |  string  |                 compute                  | |
+|                                      |                                 |                            | |     disk_gb      | integer  |                    1                     | |
+|                                      |                                 |                            | |  instance_type   |  string  |                 m1.tiny                  | |
+|                                      |                                 |                            | |    tenant_id     |  string  |     29c9874c47324c148df4195d8fe1ceb7     | |
+|                                      |                                 |                            | |   ephemeral_gb   | integer  |                    0                     | |
+|                                      |                                 |                            | | instance_type_id | integer  |                    2                     | |
+|                                      |                                 |                            | |      vcpus       | integer  |                    1                     | |
+|                                      |                                 |                            | |    memory_mb     | integer  |                   512                    | |
+|                                      |                                 |                            | |   instance_id    |  string  |   d3f70f25-fbff-4ab8-a22c-25a0d3d544c7   | |
+|                                      |                                 |                            | |       host       |  string  |            all-in-one.vm.lab             | |
+|                                      |                                 |                            | |    request_id    |  string  | req-39973224-e232-4d2e-aac8-5aedcfa47114 | |
+|                                      |                                 |                            | |    deleted_at    | datetime |           2015-07-14T16:31:59            | |
+|                                      |                                 |                            | |   launched_at    | datetime |           2015-07-14T16:26:39            | |
+|                                      |                                 |                            | +------------------+----------+------------------------------------------+ |
++--------------------------------------+---------------------------------+----------------------------+----------------------------------------------------------------------------+
