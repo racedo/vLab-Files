@@ -1,5 +1,0 @@
-# We will use all the defaults except the public IP which will be one of the current LAN we are in. When creating the host:
-
-Hosts > Add > Parameters: 
-
-controller_pub_host = 192.168.5.10
