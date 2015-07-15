@@ -1,8 +1,0 @@
-# This is the IP of the current LAN. Needs to be set in an interface that reaches the LAN where the VM is running
-DEVICE="eth2"
-BOOTPROTO="none"
-ONBOOT="yes"
-TYPE="Ethernet"
-IPADDR0=192.168.5.10
-PREFIX0=24
-MTU=1456

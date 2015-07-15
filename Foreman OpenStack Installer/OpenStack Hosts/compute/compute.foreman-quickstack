@@ -1,4 +1,0 @@
-# Edit the file: /usr/share/openstack-foreman-installer/puppet/modules/quickstack/manifests/compute_common.pp
-# To allow creating Nova Compute hosts in VMs
-
-    libvirt_type    => "qemu",  # uncomment if on a vm
