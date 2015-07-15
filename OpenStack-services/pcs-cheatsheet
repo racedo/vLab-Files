@@ -22,6 +22,19 @@ https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Hi
 pcs stonith show
 pcs stonith fence node [--off]
 pcs property set stonith-enabled=false
+pcs stonith create rhev_fence fence_rhevm \
+    stonith-timeout=300 \
+    ipaddr=10.102.100.13 \
+    ssl=1 \
+    ssl_insecure=1 \
+    login=admin@internal \
+    passwd=xxxxxx \
+    shell_timeout=60 \
+    power_wait=60 \
+    retry_on=10 \
+    power_timeout=60 \
+    action=reboot  \
+    pcmk_host_map="pcmk-controller1:controller1 pcmk-controller2:controller2 pcmk-controller3:controller3"
 crm_verify -L -V
 corosync-cfgtool -s
 /etc/corosync/corosync.conf

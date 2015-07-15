@@ -39,30 +39,33 @@ Then run kinit to change the password:
 
 kinit ospadmin
 
-4. Create a group called "enabled_users" in IPA and add all the OpenStack users, including the service users:
+4. Ensure keystone.conf has these settings
 
-ipa group-add --nonposix --desc='OpenStack user_enabled emulation for Keystone' enabled_users
-ipa group-add-member --user=ospadmin,ceilometer,heat,glance,admin,nova,cinder,neutron,heat_admin,swift,demo enabled_users
+[identity]  
+#driver=keystone.identity.backends.sql.Identity  
+driver=keystone.identity.backends.ldap.Identity  
+  
+[assignment]  
+driver = keystone.assignment.backends.sql.Assignment  
+  
+[ldap]  
+url = ldap://10.33.20.110  
+user_tree_dn=cn=users,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com  
+group_tree_dn=cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com  
+  
+user_id_attribute=uid  
+user_name_attribute=uid  
+user_mail_attribute=mail  
+  
+user_enabled_attribute=nsAccountLock  
+user_enabled_default=False  
+user_enabled_invert=true  
+  
+user_allow_create=false  
+user_allow_update=false  
+user_allow_delete=false  
 
-5. Change keystone.conf in the controller host:
-
-[identity]
-driver=keystone.identity.backends.ldap.Identity
-
-[assignment]
-driver = keystone.assignment.backends.sql.Assignment
-
-[ldap]
-url = ldap://10.33.20.185
-user_tree_dn=cn=users,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
-group_tree_dn=cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
-
-user_id_attribute=uid
-
-user_enabled_emulation = True
-user_enabled_emulation_dn = cn=enabled_users,cn=groups,cn=accounts,dc=jentrena,dc=usersys,dc=redhat,dc=com
-
-6. Restart the service:
+5. Restart the service:
 
 systemctl restart openstack-keystone
 
@@ -74,6 +77,12 @@ export OS_SERVICE_TOKEN="token_from_keystone_conf"
 8. Add the users with their roles to the tenants:
 
 keystone user-role-add --user-id ospadmin --tenant-id "ID of the admin tenant" --role-id "ID of the admin role"
+keystone user-role-add --user nova --role admin --tenant services  
+keystone user-role-add --user ceilometer --role admin --tenant services  
+keystone user-role-add --user cinder --role admin --tenant services  
+keystone user-role-add --user glance --role admin --tenant services  
+keystone user-role-add --user neutron --role admin --tenant services  
+keystone user-role-add --user swift --role admin --tenant services 
 
 9. Confirm it works
  

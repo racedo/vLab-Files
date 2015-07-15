@@ -1,3 +1,0 @@
-# If /var/lib/nova/instances on NFS then (Note to self: review if needs to be documented yet and raise bug if it does)
-
-setsebool -P virt_use_nfs on
