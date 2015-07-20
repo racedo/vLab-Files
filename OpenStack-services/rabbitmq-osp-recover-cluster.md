@@ -5,7 +5,7 @@ This procedure explains how to manually rebuild a RabbitMQ cluster after all nod
 
 Read the notes below if just one or two servers out of a 3-nodes cluster failed.
 
-**Note**: RHEL OSP 6 (Juno) includes a new Pacemaker resource that takes care of this process automatically but in case of partial cluster failure, RabbitMQ partitions are common, please, read the notes below.
+**Note**: RHEL OSP 6 (Juno) includes a new Pacemaker resource that takes care of this process automatically but in case of partial cluster failure, RabbitMQ partitions are common. Please, read the notes below about stuck queues.
 
 ### 1. On each node:
 ```
