@@ -35,3 +35,11 @@ After a failure and recovery of just one or two nodes there may be queues stuck 
 # rabbitmqctl eval 'rabbit_diagnostics:maybe_stuck().'
 ```
 If there are queues stuck you might have to manually restart services that publish messages to these queues. After a cluster partition it is common to have to restart OpenStack services such as nova-compute or any other components that publish messages in RabbitMQ. This issue is fixed in OpenStack Kilo (RHEL OSP 7) by implementing a heartbeat for the messaging queues.
+
+Alternatively, a restart of all the RabbitMQ servers usually fixes this issue. With Pacemaker this is done by:
+```
+pcs resource disable rabbitmq-server
+pcs resource enable rabbitmq-server
+```
+
+After this check that there are no partitions by checking the output of `rabbitmqctl cluster_status` in all the nodes
