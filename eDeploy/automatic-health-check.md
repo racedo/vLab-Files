@@ -92,7 +92,7 @@ OSP Installer documentation: http://red.ht/1M3QEhd
  chown -R apache:apache /var/lib/edeploy/
 ```
 
-### 9. Modify the pxe configuration for the Foreman discovery image to also include the AHC image so it looks like this (set SERV to the Foreman host IP):
+### 9. Modify the PXE configuration file for the Foreman discovery image to also include the AHC image so it looks like this (set SERV to the Foreman host IP):
 
 ```
  DEFAULT menu
