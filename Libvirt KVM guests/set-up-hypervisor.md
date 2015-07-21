@@ -1,6 +1,8 @@
-# Set up a KVM hypervisor with qcow2 images, Open vSwitch and VLANs
+# Deploying VMs in KVM
 
-## This document describes how to setup a standlone hypervisor with RHEL and KVM where the guests network is managed by Open vSwitch and the guests are built from the RHEL qcow2 image
+### Purpose
+
+This document describes how to setup a standlone hypervisor with RHEL and KVM where the guests network is managed by Open vSwitch and the guests are built from the RHEL qcow2 image
 
 The host has 3 interfaces: eth0, eth1 and eth2, where eth1 and eth2 form a bond device (bond0)
 
