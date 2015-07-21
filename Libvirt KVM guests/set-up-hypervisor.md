@@ -1,12 +1,15 @@
-#Deploying VMs in KVM
+#Deploying VMs in KVM with Open vSwitch networks
 
 ###Purpose
 
-This document describes how to setup a standlone hypervisor with RHEL and KVM where the guests network is managed by Open vSwitch and the guests are built from the RHEL qcow2 image
+This document describes how to set up a standlone hypervisor with RHEL and KVM where:
+- The guests network is managed by Open vSwitch
+- The guests are built from an existing qcow2 image
+- The Open vSwitch network supports tagged and untagged VLANs
 
 The host has 3 interfaces: eth0, eth1 and eth2, where eth1 and eth2 form a bond device (bond0)
 
-The guests will have 2 interfaces: eth0 connected to the hosts eth0 via Open vSwitch and eth1 connected to bond0 also via Open vSwitch
+The guests will have 2 interfaces: eth0 connected to the host's eth0 via Open vSwitch and eth1 connected to the host's bond0, also via Open vSwitch
 
 ### 1. Subscribe to the right channels:
 ```
