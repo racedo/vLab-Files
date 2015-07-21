@@ -2,14 +2,14 @@
 
 ###Purpose
 
-This document describes how to set up a standlone hypervisor with RHEL and KVM where:
+This document describes how to set up a standalone hypervisor with RHEL and KVM where:
 - The guests network is managed by Open vSwitch
 - The guests are built from an existing qcow2 image
 - The Open vSwitch network supports tagged and untagged VLANs
 
-The host has 3 interfaces: eth0, eth1 and eth2, where eth1 and eth2 form a bond device (bond0)
+The host has 3 interfaces: eth0, eth1 and eth2, where eth1 and eth2 form a bond device (bond0).
 
-The guests will have 2 interfaces: eth0 connected to the host's eth0 via Open vSwitch and eth1 connected to the host's bond0, also via Open vSwitch
+The guests will have 2 interfaces: eth0 connected to the host's eth0 via Open vSwitch and eth1 connected to the host's bond0, also via Open vSwitch.
 
 This example is done with Red Hat Enterprise Linux machine but it can be done with any other Linux OS.
 
@@ -132,15 +132,16 @@ https://access.redhat.com/downloads/content/69/ver=/rhel---7/7.1/x86_64/product-
 ## 10. Remove cloud-init, set a root password and alow ssh
 https://access.redhat.com/solutions/641193
 
-In the /etc/shadow file paste the root password between the ::
+In the `/etc/shadow` file paste the root password between the `::`
 
-Create a password to add to the /etc/shadow file with `openssl passwd -1 changeme`
+Create a password to add to the `/etc/shadow` file with `openssl passwd -1 changeme`
 
-Then the /etc/ssh/sshd_conig will need these two parameters
+Then the `/etc/ssh/sshd_conig` will need these two parameters
 ```
 PermitRootLogin yes
 PasswordAuthentication yes
 ```
+With the above in mind, modify the qcow2 image:
 ```
 guestfish -a /tmp/rhel-guest-image-7.1-20150224.0.x86_64.qcow2 -i ln-sf /dev/null /etc/systemd/system/cloud-init.service
 guestfish --rw -a /tmp/rhel-guest-image-7.1-20150224.0.x86_64.qcow2
@@ -151,7 +152,7 @@ guestfish --rw -a /tmp/rhel-guest-image-7.1-20150224.0.x86_64.qcow2
 ><fs> vi /etc/ssh/sshd_config
 ><fs> quit
 ```
-### 11.Extend the qcow2 image partition to the desired size:
+### 11. Extend the qcow2 image partition to the desired size:
 
 Create a new qcow2 file with the desired size (10 GB in the example):
 ```
@@ -175,13 +176,13 @@ virt-install \
 ```
 This will start the VM and its console will be accessible by a VNC client on default port 5900.
 ### 13. Stop the VM and add the network interfaces
-This is needed because `virt-install` doesn't support openvswitch ports.
+This is needed because `virt-install` doesn't support Open vSwitch ports.
 
 ```
 virsh stop vm1
 virsh edit vm1
 ```
-Add this in the devices section:
+Add this in the `devices` section:
 ```
     <interface type='network'>
       <source network='ovs-eth0-network' portgroup='no-vlan'/>
@@ -194,9 +195,9 @@ Add this in the devices section:
 ```
 ### 14. Set up the interface that is VLAN tagged:
 
-```
-yum remove NetworkManager
+`yum remove NetworkManager`
 
+```
 vi /etc/sysconfig/network-scripts/ifcfg-eth1.100
 DEVICE="eth1.100"
 BOOTPROTO=none
@@ -206,5 +207,7 @@ VLAN=yes
 IPADDR0=1.1.1.1
 PREFIX0=24
 ```
+`ifup eth1.100`
+
 Now, assuming the network settings in the interface are correct, we should be able to access other hosts and VMs in VLAN 100.
 
