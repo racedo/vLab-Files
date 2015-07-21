@@ -1,5 +1,7 @@
 #Deploying VMs in KVM with Open vSwitch networks
 
+![OVS Libvirt VLANs](/Libvirt%20KVM%20guests/OVS%20Libvirt%20VLANs.png)
+
 ###Purpose
 
 This document describes how to set up a standalone hypervisor with RHEL and KVM where:
