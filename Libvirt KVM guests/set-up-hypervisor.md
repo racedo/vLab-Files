@@ -1,6 +1,6 @@
-# Deploying VMs in KVM
+#Deploying VMs in KVM
 
-### Purpose
+###Purpose
 
 This document describes how to setup a standlone hypervisor with RHEL and KVM where the guests network is managed by Open vSwitch and the guests are built from the RHEL qcow2 image
 
