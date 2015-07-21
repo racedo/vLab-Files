@@ -11,7 +11,7 @@ The host has 3 interfaces: eth0, eth1 and eth2, where eth1 and eth2 form a bond 
 
 The guests will have 2 interfaces: eth0 connected to the host's eth0 via Open vSwitch and eth1 connected to the host's bond0, also via Open vSwitch
 
-The example is done with Red Hat Enterprise Linux machine but it can be done with any other Linux OS.
+This example is done with Red Hat Enterprise Linux machine but it can be done with any other Linux OS.
 
 ### 1. Subscribe to the right channels:
 ```
