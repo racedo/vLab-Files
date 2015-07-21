@@ -1,6 +1,6 @@
 #Deploying VMs in KVM with Open vSwitch networks
 
-![GitHub Logo](/Libvirt%20KVM%20guests/OVS%20Libvirt%20VLANs.png)
+![OVS Libvirt VLANs](/Libvirt%20KVM%20guests/OVS%20Libvirt%20VLANs.png)
 
 ###Purpose
 
