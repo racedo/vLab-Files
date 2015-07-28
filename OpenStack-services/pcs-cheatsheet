@@ -41,34 +41,15 @@ corosync-cfgtool -s
 /etc/corosync/corosync.conf
 
 Rebooting the pcs cluster:
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/High_Availability_Add-On_Reference/s1-clusternodemanage-HAAR.html#s2-standbymode-HAAR
 
-Check the status before restarting the nodes:
-[root@controller1 ~]# pcs status
-[root@controller1 ~]# mysql -e "show status like wsrep_cluster_size;"
+pcs cluster standby node
+Then reboot
+
+To check and report status:
+
+mysql -e "show status like wsrep_cluster_size;"
 wsrep_cluster_size    3
-[root@controller1 ~]# pcs status | grep -- 'stopped' || echo OK;
-OK
- 
-Restart of controller1:
-[root@controller1 ~]# reboot
-wait...
-[root@controller2 ~]# mysql -e "show status like wsrep_cluster_size;"
-wsrep_cluster_size    3
-[root@controller2 ~]# pcs status | grep -- 'stopped' || echo OK;
-OK
- 
-Restart of controller2:
-[root@controller2 ~]# reboot
-wait...
-[root@controller3 ~]# mysql -e "show status like wsrep_cluster_size;"
-wsrep_cluster_size    3
-[root@controller3 ~]# pcs status | grep -- 'stopped' || echo OK;
-OK
- 
-Restart of controller3:
-[root@controller3 ~]# reboot
-wait...
-[root@controller1 ~]# mysql -e "show status like wsrep_cluster_size;"
-wsrep_cluster_size    3
-[root@controller1 ~]# pcs status | grep -- 'stopped' || echo OK;
+
+pcs status | grep -- 'stopped' || echo OK;
 OK
