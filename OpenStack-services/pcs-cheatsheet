@@ -35,6 +35,40 @@ pcs stonith create rhev_fence fence_rhevm \
     power_timeout=60 \
     action=reboot  \
     pcmk_host_map="pcmk-controller1:controller1 pcmk-controller2:controller2 pcmk-controller3:controller3"
+
 crm_verify -L -V
 corosync-cfgtool -s
 /etc/corosync/corosync.conf
+
+Rebooting the pcs cluster:
+
+Check the status before restarting the nodes:
+[root@controller1 ~]# pcs status
+[root@controller1 ~]# mysql -e "show status like wsrep_cluster_size;"
+wsrep_cluster_size    3
+[root@controller1 ~]# pcs status | grep -- 'stopped' || echo OK;
+OK
+ 
+Restart of controller1:
+[root@controller1 ~]# reboot
+wait...
+[root@controller2 ~]# mysql -e "show status like wsrep_cluster_size;"
+wsrep_cluster_size    3
+[root@controller2 ~]# pcs status | grep -- 'stopped' || echo OK;
+OK
+ 
+Restart of controller2:
+[root@controller2 ~]# reboot
+wait...
+[root@controller3 ~]# mysql -e "show status like wsrep_cluster_size;"
+wsrep_cluster_size    3
+[root@controller3 ~]# pcs status | grep -- 'stopped' || echo OK;
+OK
+ 
+Restart of controller3:
+[root@controller3 ~]# reboot
+wait...
+[root@controller1 ~]# mysql -e "show status like wsrep_cluster_size;"
+wsrep_cluster_size    3
+[root@controller1 ~]# pcs status | grep -- 'stopped' || echo OK;
+OK
