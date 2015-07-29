@@ -9,7 +9,9 @@ neutron router-interface-add router1 admin-subnet1
 neutron router-gateway-set router1 external-net
 neutron floatingip-create external-net
 
-Provider networks set up as VLAN or FLAT:
+Provider networks set up as VLAN or FLAT
+
+For FLAT:
 
 Example using vmnet7 where:
 
@@ -34,3 +36,18 @@ eth1 is connected to external network 192.168.133.0/24 which has 192.168.133.2 a
 
 neutron net-create vmnet7 --shared  --provider:network_type flat --provider:physical_network vmnet7
 neutron subnet-create --name flat-provider-subnet --gateway 192.168.133.2 --dns-nameserver 192.168.133.2  --allocation-pool start=192.168.133.100,end=192.168.133.150 vmnet7 192.168.133.0/24
+
+For VLAN:
+
+/etc/neutron/plugin.ini:
+[ml2]
+type_drivers = vxlan,vlan
+
+/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+network_vlan_ranges = physnet-trunk:3011:3267
+bridge_mappings = physnet-trunk:br-trunk
+
+# ovs-vsctl list-ports br-trunk
+eth1
+
+# neutron net-create --shared vlan3524 --provider:physical_network=physnet-trunk --provider:network_type=vlan --provider:segmentation_id=3524
