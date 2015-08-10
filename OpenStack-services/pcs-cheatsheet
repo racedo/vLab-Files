@@ -48,7 +48,7 @@ Then reboot
 
 To check and report status:
 
-mysql -e "show status like wsrep_cluster_size;"
+mysql -e "show global status like 'wsrep_cluster_size';"
 wsrep_cluster_size    3
 
 pcs status | grep -- 'stopped' || echo OK;
