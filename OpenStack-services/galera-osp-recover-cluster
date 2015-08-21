@@ -1,4 +1,6 @@
-Note: I haven't verified if this process has any  impact in the database content.
+Note: 
+ - New method well explained here: https://access.redhat.com/articles/1298564
+ - Can't do step 1 in OSP 7
 
 1. First find the node with highest seqno:
 
