@@ -1,7 +1,7 @@
 External networks set up as VXLAN or GRE:
 
 neutron net-create external-net --router:external=True
-neutron subnet-create external-net --name=external-subnet --gateway=192.168.5.2 --disable-dhcp --allocation-pool start=192.168.5.200,end=192.168.5.250 192.168.5.0/24
+neutron subnet-create --name=external-subnet --gateway=192.168.5.2 --disable-dhcp --allocation-pool start=192.168.5.200,end=192.168.5.250 external-net 192.168.5.0/24
 neutron net-create admin-net1
 neutron subnet-create --name admin-subnet1 admin-net1 10.0.0.0/24
 neutron router-create router1
