@@ -89,7 +89,7 @@ virsh net-undefine default
 ```
 ### 6. Create the two network definitions needed for libvirt
 ```
-vi libvirt-br-bond0.xml
+vi libvirt-br-eth0.xml
 <network>
   <name>ovs-eth0-network</name>
   <forward mode='bridge'/>
