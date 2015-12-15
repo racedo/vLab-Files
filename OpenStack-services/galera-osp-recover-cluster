@@ -1,6 +1,13 @@
 Note: 
  - New method well explained here: https://access.redhat.com/articles/1298564
  - Can't do step 1 in OSP 7
+ - In OSP 7 if seeing this (https://bugzilla.redhat.com/show_bug.cgi?id=1284526): 
+   * galera_start_0 on overcloud-controller-0 'unknown error' (1): call=260, status=complete, exitreason='Unable to detect last known write sequence number',
+   Then do this: 
+   mysqld_safe --user=mysql --datadir=/var/lib/mysql --wsrep-recover --tc-heuristic-recover rollback
+   pcs cleanup galera
+  
+General instructions:
 
 1. First find the node with highest seqno:
 
