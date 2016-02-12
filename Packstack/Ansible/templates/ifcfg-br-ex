@@ -4,7 +4,8 @@ DEVICE=br-ex
 DEVICETYPE=ovs
 BOOTPROTO=static
 TYPE=OVSBridge
-IPADDR1=172.24.4.224
+# By default packstack will create a public network in 172.24.224/28 (PROVISION_DEMO_FLOATRANGE) with .225 as its gateway
+IPADDR1=172.24.4.225 
 PREFIX1=28
 IPADDR0={{ br_ex_ipaddr }}
 PREFIX0={{ br_ex_prefix }}
