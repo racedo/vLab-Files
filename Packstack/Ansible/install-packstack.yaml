@@ -1,4 +1,5 @@
-# Example of installing Packstack all in one with just one Ansible Playbook. A number of custom fixes 
+# Example of installing Packstack all in one with just one Ansible Playbook. A number of custom fixes are included which can be deleted in your system
+# Run it with: ansible-playbook -i hosts install-packstack.yaml
 
 - name: Install Packstack
   hosts: all
