@@ -1,0 +1,11 @@
+NAME=br-ex
+ONBOOT=yes
+DEVICE=br-ex
+DEVICETYPE=ovs
+BOOTPROTO=static
+TYPE=OVSBridge
+IPADDR1=172.24.4.224
+PREFIX1=28
+IPADDR0={{ br_ex_ipaddr }}
+PREFIX0={{ br_ex_prefix }}
+GATEWAY={{ br_ex_gateway }}
