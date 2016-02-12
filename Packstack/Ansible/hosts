@@ -1,0 +1,3 @@
+[my_hosts]
+my-host-01.example ansible_user=root
+my-host-02.example ansible_user=root
