@@ -5,7 +5,7 @@
 
    # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Deployment_and_Administration_Guide/chap-Guest_virtual_machine_device_configuration.html#proc-PCI_devices-Preparing_an_Intel_system_for_PCI_device_assignment
    - name: Enable Intel VT-d
-     lineinfile: dest=/etc/default/grub regexp='(^GRUB_CMDLINE_LINUX=.*quiet)"' line='\1 intel_iommu=pt"' backup=True backrefs=yes
+     lineinfile: dest=/etc/default/grub regexp='(^GRUB_CMDLINE_LINUX=.*quiet)"' line='\1 intel_iommu=pt ixgbe.max_vfs=8"' backup=True backrefs=yes
      notify:
       - Regenerate config file
       - Rebuild initramfs
