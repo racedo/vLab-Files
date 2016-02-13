@@ -6,7 +6,18 @@
    # https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Virtualization_Deployment_and_Administration_Guide/chap-Guest_virtual_machine_device_configuration.html#proc-PCI_devices-Preparing_an_Intel_system_for_PCI_device_assignment
    - name: Enable Intel VT-d
      lineinfile: dest=/etc/default/grub regexp='(^GRUB_CMDLINE_LINUX=.*quiet)"' line='\1 intel_iommu=pt"' backup=True backrefs=yes
+     notify:
+      - Regenerate config file
+      - Reboot
+      - Wait for server to come back
 
+
+   - name: Enable SR-IOV module
+     modprobe: name=ixgbe state=present params="max_vfs=8"
+
+
+  handlers:
+    
    - name: Regenerate config file 
      command: grub2-mkconfig -o /boot/grub2/grub.cfg
 
@@ -16,5 +27,6 @@
      poll: 0
      ignore_errors: true
   
-   - name: waiting for server to come back
+   - name: Wait for server to come back
      local_action: wait_for host={{ inventory_hostname }} state=started delay=30 timeout=300
+     
