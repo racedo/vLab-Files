@@ -18,6 +18,15 @@
    - name: Make Virtual Functions parameter persistent
      lineinfile: dest=/etc/modprobe.d/ixgbe.conf line="options ixgbe max_vfs=8" state=present create=yes
 
+   - name: Add vlan option to Neutron ML2
+     ini_file: dest=/etc/neutron/plugin.ini section=ml2 option=tenant_network_types value="vxlan,vlan" backup=yes
+   
+   - name: Add sriovnicswitch option to mecanish_drivers to Neutron ML2
+     ini_file: dest=/etc/neutron/plugin.ini section=ml2 option=mechanism_drivers value="openvswitch,sriovnicswitch" backup=yes
+
+   - name: Add VLANs 16 to 22 to network_vlan_ranges Neutron ML2
+     ini_file: dest=/etc/neutron/plugin.ini section=ml2_type_vlan option=network_vlan_ranges value="physnet1:16:22" backup=yes
+
   handlers:
 
    - name: Regenerate config file 
