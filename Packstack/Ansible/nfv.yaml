@@ -8,19 +8,25 @@
      lineinfile: dest=/etc/default/grub regexp='(^GRUB_CMDLINE_LINUX=.*quiet)"' line='\1 intel_iommu=pt"' backup=True backrefs=yes
      notify:
       - Regenerate config file
+      - Rebuild initramfs
       - Reboot
       - Wait for server to come back
 
-   - name: Enable VFs parameter in module
+   - name: Enable Virtual Functionss parameter in module
      modprobe: name=ixgbe state=present params="max_vfs=8"
 
-   - name: Make VFs parameter persistent
+   - name: Make Virtual Functions parameter persistent
      lineinfile: dest=/etc/modprobe.d/ixgbe.conf line="options ixgbe max_vfs=8" state=present create=yes
 
   handlers:
 
    - name: Regenerate config file 
      command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+   - name: Rebuild initramfs
+     shell: |
+            cp /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.$(date +%m-%d-%H%M%S).bak
+            dracut -f -v
 
    - name: Reboot
      shell: sleep 2 && shutdown -r now "Ansible reboot"
