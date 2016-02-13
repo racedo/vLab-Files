@@ -11,11 +11,14 @@
       - Reboot
       - Wait for server to come back
 
-   - name: Enable SR-IOV module
+   - name: Enable VFs parameter in module
      modprobe: name=ixgbe state=present params="max_vfs=8"
 
+   - name: Make VFs parameter persistent
+     lineinfile: dest=/etc/modprobe.d/ixgbe.conf line="options ixgbe max_vfs=8" state=present create=yes
+
   handlers:
-    
+
    - name: Regenerate config file 
      command: grub2-mkconfig -o /boot/grub2/grub.cfg
 
