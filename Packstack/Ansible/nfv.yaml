@@ -27,6 +27,9 @@
    - name: Add VLANs 16 to 22 to network_vlan_ranges Neutron ML2
      ini_file: dest=/etc/neutron/plugin.ini section=ml2_type_vlan option=network_vlan_ranges value="physnet1:16:22" backup=yes
 
+   - name: Add supported_pci_vendor_devs to ml2_conf_sriov.ini
+     ini_file: dest=/etc/neutron/plugins/ml2/ml2_conf_sriov.ini section=ml2_sriov option=supported_pci_vendor_devs value="8086:1528" backup=yes
+     
   handlers:
 
    - name: Regenerate config file 
