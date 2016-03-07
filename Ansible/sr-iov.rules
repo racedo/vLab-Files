@@ -1,1 +1,0 @@
-ACTION=="add", KERNEL=="{{nicf1businfo.stdout}}", SUBSYSTEM=="pci", RUN+="/usr/bin/bash -c 'echo {{NRVF}} > /sys/bus/pci/devices/{{tnicf1businfo.stdout}}/sriov_numvfs'"
