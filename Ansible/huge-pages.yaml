@@ -42,19 +42,19 @@
         - { name: 'ksm', enabled: 'no', state: 'stopped' }
         - { name: 'ksmtuned', enabled: 'no', state: 'stopped' }
 
-    # Can't use ini_file due to ": " and "" with multiple options so using lineinfile
-    - name: Add pci_alias to nova.conf
-      lineinfile:
-        dest: /etc/nova/nova.conf
-        insertafter: '^\[DEFAULT\]'
-        line: 'pci_alias={ "vendor_id": "8086", "product_id": "1528", "name": "my_PF"}'
+   # Can't use ini_file due to ": " and "" with multiple options so using lineinfile
+   - name: Add pci_alias to nova.conf
+     lineinfile:
+       dest: /etc/nova/nova.conf
+       insertafter: '^\[DEFAULT\]'
+       line: 'pci_alias={ "vendor_id": "8086", "product_id": "1528", "name": "my_PF"}'
 
-    - name: Set remaining nova.conf settings
-      ini_file: dest=/etc/nova/nova.conf section={{ item.section }} option={{ item.option }} value={{ item.value }} backup=yes     
-      with_items:
-        - { section: 'DEFAULT', option: 'vcpu_pin_set', value: '{{isolcpus}}'}
-        - { section: 'neutron', option: 'allow_duplicate_networks', value: 'True'}
-      notify: 
+   - name: Set remaining nova.conf settings
+     ini_file: dest=/etc/nova/nova.conf section={{ item.section }} option={{ item.option }} value={{ item.value }} backup=yes     
+     with_items:
+       - { section: 'DEFAULT', option: 'vcpu_pin_set', value: '{{isolcpus}}'}
+       - { section: 'neutron', option: 'allow_duplicate_networks', value: 'True'}
+     notify: 
         - Restart nova api
         - Restart nova scheduler
         - Restart nova conductor
