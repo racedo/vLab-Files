@@ -1,0 +1,3 @@
+BOOTPROTO=none
+DEVICE=p5p2
+ONBOOT=yes

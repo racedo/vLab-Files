@@ -1,0 +1,103 @@
+- name: Enable Hugepages
+  hosts: pending
+  vars:
+     isolcpus: 2-15,18-31
+  
+  tasks:
+
+   - name: Check if hugepages params have been added to GRUB
+     command: awk /.*default_hugepagesz=1G/ /etc/default/grub
+     register: hugepagesz_exists
+
+   - name: Enable hugepages in GRUB
+     lineinfile: dest=/etc/default/grub regexp='(^GRUB_CMDLINE_LINUX=.*)"$' line='\1 default_hugepagesz=1G hugepagesz=1G isolcpus={{isolcpus}}"' backup="True" backrefs="yes"
+     notify:
+      - Regenerate config file
+      - Rebuild initramfs
+      - Reboot
+      - Wait for server to come back   
+     when: hugepagesz_exists.stdout == ""
+ 
+   - name: Create systemd hugetlb-reserve-pages service
+     template: src={{item.src}} dest={{item.dest}} mode=0755
+     with_items:
+        - { src: 'templates/hugetlb-reserve-pages', dest: '/usr/lib/systemd/hugetlb-reserve-pages' }
+        - { src: 'templates/hugetlb-gigantic-pages.service', dest: '/usr/lib/systemd/system/hugetlb-gigantic-pages.service' }
+
+   - name: Create /mnt/huge directory
+     file: path=/mnt/huge state=directory mode=0755
+
+   - name: Check if hugepages entry in /etc/fstab exists
+     command: awk /.*hugetlbfs.*/ /etc/fstab
+     register: hugetlbfs_exists
+
+   - name: Add hugepages line to /etc/fstab
+     lineinfile: dest=/etc/fstab line='nodev /mnt/huge hugetlbfs pagesize=1GB 0 0' backup=True
+     when: hugetlbfs_exists.stdout == ""
+
+   - name: Enable and start hugetlb-gigantic-pages service and disable ksm and ksmtuned
+     service: name={{item.name}} state={{item.state}} enabled={{item.enabled}}
+     with_items:
+        - { name: 'hugetlb-gigantic-pages', enabled: 'yes', state: 'started' }
+        - { name: 'ksm', enabled: 'no', state: 'stopped' }
+        - { name: 'ksmtuned', enabled: 'no', state: 'stopped' }
+
+    # Can't use ini_file due to ": " and "" with multiple options so using lineinfile
+    - name: Add pci_alias to nova.conf
+      lineinfile:
+        dest: /etc/nova/nova.conf
+        insertafter: '^\[DEFAULT\]'
+        line: 'pci_alias={ "vendor_id": "8086", "product_id": "1528", "name": "my_PF"}'
+
+    - name: Set remaining nova.conf settings
+      ini_file: dest=/etc/nova/nova.conf section={{ item.section }} option={{ item.option }} value={{ item.value }} backup=yes     
+      with_items:
+        - { section: 'DEFAULT', option: 'vcpu_pin_set', value: '{{isolcpus}}'}
+        - { section: 'neutron', option: 'allow_duplicate_networks', value: 'True'}
+      notify: 
+        - Restart nova api
+        - Restart nova scheduler
+        - Restart nova conductor
+        - Restart openstack nova cert
+
+  handlers:
+
+   - name: Regenerate config file 
+     command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+   - name: Rebuild initramfs
+     shell: |
+            cp /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.$(date +%m-%d-%H%M%S).bak
+            dracut -f -v
+
+   - name: Reboot
+     shell: sleep 2 && shutdown -r now "Ansible reboot"
+     async: 1
+     poll: 0
+     ignore_errors: true
+  
+   - name: Wait for server to come back
+     local_action: wait_for host={{ inventory_hostname }} state=started delay=30 timeout=300
+
+   - name: Restart nova scheduler
+     service: name=openstack-nova-scheduler state=restarted
+
+   - name: Restart nova compute 
+     service: name=openstack-nova-compute state=restarted
+
+   - name: Restart neutron server
+     service: name=openstack-nova-compute state=restarted
+
+   - name: Restart nova api
+     service: name=openstack-nova-api state=restarted
+
+   - name: Restart nova conductor
+     service: name=openstack-nova-conductor state=restarted
+
+   - name: Restart nova cert
+     service: name=openstack-nova-cert state=restarted
+
+   - name: ifup {{passthrough_interface}}
+     shell: ifup {{passthrough_interface}}
+
+
