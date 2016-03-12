@@ -1,0 +1,79 @@
+- name: Install Packstack
+  hosts: my_hosts
+  vars:
+   br_ex_interface: em1
+   br_ex_ipaddr: "{{ ansible_default_ipv4.address }}"
+   br_ex_prefix: 21  # I don't know how to get the PREFIX instead of the NETMASK
+   br_ex_gateway: "{{ ansible_default_ipv4.gateway }}"
+
+  vars_prompt:
+
+    - name: rhn_user
+      prompt: Red Hat CDN username
+      private: no
+    - name: rhn_password
+      prompt: Red Hat CDN Password
+    - name: rhn_pool_id
+      prompt: Red Hat CDN Pool
+      default: Employee SKU
+      private: no
+
+  tasks:
+
+  - name: Register system into Red Hat CDN
+    redhat_subscription: state=present username={{rhn_user}} password={{rhn_password}} pool={{rhn_pool_id}} autosubscribe=true
+
+  - name: Subscribe to rhel-7-server-openstack-7.0-rpms
+    shell: 'subscription-manager repos --disable="*" && subscription-manager repos --enable=rhel-7-server-rpms --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms --enable=rhel-7-server-openstack-7.0-rpms'
+
+  - name: Install Packstack package
+    yum: name=openstack-packstack state=latest
+ 
+  - name: Deploy Packstack all in one 
+    command: packstack --allinone --os-neutron-ovs-bridge-mappings=ext-net:br-ex --os-neutron-ovs-bridge-interfaces=br-ex:{{br_ex_interface}} --nagios-install=n --os-heat-install=y --keystone-admin-passwd=redhat --keystone-demo-passwd=redhat
+
+  - name: Set br-ex to static
+    template: src=templates/ifcfg-br-ex dest=/etc/sysconfig/network-scripts/ifcfg-br-ex
+
+  - name: Set ifcfg-p5p1
+    template: src=templates/ifcfg-p5p1 dest=/etc/sysconfig/network-scripts/ifcfg-p5p1
+
+  - name: Set ifcfg-p5p2
+    template: src=templates/ifcfg-p5p2 dest=/etc/sysconfig/network-scripts/ifcfg-p5p2
+
+  # Workaround for: https://bugzilla.redhat.com/show_bug.cgi?id=1236229 
+  - name: Fix keystonerc_demo OS_IDENTITY_API_VERSION (bz 1236229)
+    lineinfile: dest=/root/keystonerc_demo regexp="^export OS_IDENTITY_API_VERSION=" line="export OS_IDENTITY_API_VERSION=2.0"
+  - name: Fix keystonerc_demo PS1 (bz 1236229)
+    lineinfile: dest=/root/keystonerc_demo regexp="^export PS1=" line="export PS1='[\u@\h \W(keystone_demo)]\$ '"
+
+  - name: Fix for bz 1178497
+    command: systemctl mask dracut-shutdown.service
+
+  - name: Update private network dns and create floating IPs range
+    shell: |
+       source /root/keystonerc_admin
+       neutron subnet-update --dns-nameserver 10.11.5.19 private_subnet
+       neutron router-gateway-clear router1
+       neutron subnet-delete public_subnet
+       neutron subnet-create --gateway 10.12.7.254 --name public_subnet --disable-dhcp --allocation-pool start={{floatrange_start}},end={{floatrange_end}} public 10.12.0.0/21
+       neutron router-gateway-set router1 public
+       openstack image create --container-format bare --disk-format qcow2 --public --copy-from http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2 centos7
+       openstack keypair create openstack-key > .ssh/openstack-key
+       chmod 700 .ssh/openstack-key
+       openstack security group rule create --proto tcp --dst-port 22 default
+       openstack security group rule create --proto tcp --dst-port 5000 default
+       openstack security group rule create --proto icmp --dst-port -1  default
+
+  # REMEMBER TO UNREGISTER SYSTEMS WHEN DONE!
+  - name: Unregister system from Red Hat CDN
+    redhat_subscription: state=absent
+
+#  - name: Reboot
+#    shell: sleep 2 && shutdown -r now "Ansible reboot"
+#    async: 1
+#    poll: 0
+#    ignore_errors: true
+  
+#  - name: waiting for server to come back
+#    local_action: wait_for host={{ inventory_hostname }} state=started delay=30 timeout=300

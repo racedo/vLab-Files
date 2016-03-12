@@ -1,9 +1,10 @@
 - name: Enable NFV
-  hosts: pending
+  hosts: my_hosts
   vars:
      sriov_interface: p5p1
      passthrough_interface: p5p2
      pci_id: "8086:1515"
+     network_vlan_ranges: "2150:2157"
   
   tasks:
 
@@ -26,6 +27,9 @@
 
    - name: Enable Virtual Functions parameter in module
      modprobe: name=ixgbe state=present params="max_vfs=7"
+
+   - name: remove the NetworkManager package
+     yum: name=NetworkManager state=absent
 
    #- name: Make Virtual Functions parameter persistent
    #  lineinfile: dest=/etc/modprobe.d/ixgbe.conf line="options ixgbe max_vfs=7" state=present create=yes
@@ -62,8 +66,8 @@
    - name: Add sriovnicswitch option to mecanish_drivers to Neutron ML2
      ini_file: dest=/etc/neutron/plugin.ini section=ml2 option=mechanism_drivers value="openvswitch,sriovnicswitch" backup=yes
 
-   - name: Add VLANs 16 to 22 to network_vlan_ranges Neutron ML2
-     ini_file: dest=/etc/neutron/plugin.ini section=ml2_type_vlan option=network_vlan_ranges value="physnet_sriov:16:22" backup=yes
+   - name: Add VLANs {{network_vlan_ranges}} to network_vlan_ranges Neutron ML2
+     ini_file: "dest=/etc/neutron/plugin.ini section=ml2_type_vlan option=network_vlan_ranges value='physnet_sriov:{{network_vlan_ranges}}' backup=yes"
 
    - name: Add supported_pci_vendor_devs to ml2_conf_sriov.ini
      ini_file: dest=/etc/neutron/plugins/ml2/ml2_conf_sriov.ini section=ml2_sriov option=supported_pci_vendor_devs value={{pci_id}} backup=yes
@@ -76,42 +80,37 @@
      notify:
        - Restart nova scheduler
 
-   - name: Add pci_passthrough_whitelist to nova.conf
+   # Can't do this with ini_file as double quotes are converted to single. WARNING: if run twice will add the line again.
+   - name: Add pci_passthrough_whitelist for {{ passthrough_interface }} to nova.conf
      lineinfile:
        dest: /etc/nova/nova.conf
        insertafter: '^\[DEFAULT\]'
-       line: 'pci_passthrough_whitelist={ "devname": "{{ sriov_interface }}", "physical_network": "physnet_sriov"}'
+       line: 'pci_passthrough_whitelist={ "devname": "{{ passthrough_interface }}" }'
+     notify:
+       - Restart nova compute
+   
+   - name: Add pci_passthrough_whitelist for {{ sriov_interface }} to nova.conf
+     lineinfile:
+       dest: /etc/nova/nova.conf
+       insertafter: '^\[DEFAULT\]'
+       line: 'pci_passthrough_whitelist={ "devname": "{{ sriov_interface }}", "physical_network": "physnet_sriov" }'
+       
+     notify:
+       - Restart nova compute
 
+   # Can't do this with ini_file as double quotes are converted to single. WARNING: if run twice will add the line again.
+   - name: Add pci_alias to nova.conf
+     lineinfile:
+       dest: /etc/nova/nova.conf
+       insertafter: '^\[DEFAULT\]'
+       line: 'pci_alias={ "vendor_id": "8086", "product_id": "1528", "name": "my_PF"}'
+     notify:
+       - Restart nova compute
 
    - name: Add ml2_conf_sriov.ini to neutron-server systemd file
      lineinfile: dest=/usr/lib/systemd/system/neutron-server.service regexp="(^.*.)(--log-file /var/log/neutron/server.log$)" line="\1 \2 --config-file /etc/neutron/plugins/ml2/ml2_conf_sriov.ini" backup=True backrefs=yes
-
-   #  notify:
-   #    - Restart neutron server
-   # sriov-nic-agent does not work with these cards
-   #
-   # - name: Install the sriov-nic-agent package 
-   #   yum: name=openstack-neutron-sriov-nic-agent state=latest
-
-   # - name: Enable NoopFirewallDriver in the /etc/neutron/plugin.ini file
-   #   ini_file: dest=/etc/neutron/plugin.ini section=securitygroup option=firewall_driver value=neutron.agent.firewall.NoopFirewallDriver backup=yes
-
-   # - name: Add mappings to the /etc/neutron/plugins/ml2/ml2_conf_sriov.ini file
-   #  ini_file: dest=/etc/neutron/plugins/ml2/ml2_conf_sriov.ini  section={{ item.section }}  option={{ item.option }} value={{ item.value }} backup=yes
-   #  with_items:
-   #    - { section: 'sriov_nic', option: 'physical_device_mappings', value: 'physnet1:{{sriov_interface}}'}
-   #    - { section: 'sriov_nic', option: 'exclude_devices', value: ''}
-
-   # - name: Add ml2_conf_sriov.ini to neutron-sriov-nic-agent systemd file
-   #   lineinfile: dest=/usr/lib/systemd/system/neutron-sriov-nic-agent.service regexp="(^.*.)(--log-file /var/log/neutron/sriov-nic-agent.log$)" line="\1 \2 --config-file /etc/neutron/plugins/ml2/ml2_conf_sriov.ini" backup=True backrefs=yes
-
-   # - name: Add ml2_conf_sriov.ini to neutron-server systemd file
-   #  lineinfile: dest=/usr/lib/systemd/system/neutron-server.service regexp="(^.*.)(--log-file /var/log/neutron/server.log$)" line="\1 \2 --config-file /etc/neutron/plugins/ml2/ml2_conf_sriov.ini" backup=True backrefs=yes
-   #  notify:
-   #    - Restart neutron server
-
-   # - name: Enable and start neutron-sriov-nic-agent
-   #  service: name=neutron-sriov-nic-agent state=started enabled=yes
+     notify:
+       - Restart neutron server
 
   handlers:
 
