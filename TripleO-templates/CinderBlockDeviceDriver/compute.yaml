@@ -1,0 +1,29 @@
+heat_template_version: 2014-10-16
+
+description: >
+  Extra host post configuration
+
+parameters:
+  servers:
+    type: json
+
+resources:
+  ExtraConfig:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: script
+      config: |
+            #!/bin/sh
+            if [[ `hostname` = *"compute"* ]]
+            then
+
+               systemctl restart openstack-cinder-volume.service
+
+            fi
+
+  ExtraDeployments:
+    type: OS::Heat::SoftwareDeployments
+    properties:
+      servers:  {get_param: servers}
+      config: {get_resource: ExtraConfig}
+      actions: ['CREATE','UPDATE']

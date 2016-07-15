@@ -1,0 +1,37 @@
+parameters:
+  CinderEnableIscsiBackend: false
+  CinderEnableRbdBackend: false
+  CinderEnableNfsBackend: false
+  NovaEnableRbdBackend: false
+  GlanceBackend: file
+
+parameter_defaults:
+
+  NovaComputeExtraConfig:
+    nova::compute::default_availability_zone: '"%{::hostname}"'
+    cinder::config::cinder_config:
+        bdd/volume_driver:
+            value: cinder.volume.drivers.block_device.BlockDeviceDriver
+        bdd/volumes_dir:
+            value: /var/lib/cinder/volumes
+        bdd/available_devices:
+            value: /dev/vdb,/dev/vdc,/dev/vdd
+        bdd/volume_backend_name:
+            value: bdd
+        bdd/iscsi_helper:
+            value: lioadm
+    mysql_ip: {get_input: nova_api_host}
+    cinder::database_connection: "mysql+pymysql://cinder:3FVHGGPFmzjCGdrn2DeYn4PE6@%{hiera('mysql_ip')}/cinder"
+    cinder::storage_availability_zone: '"%{::hostname}"'
+    cinder::rabbit_userid: {get_input: rabbit_username}
+    cinder::rabbit_password: {get_input: rabbit_password}
+    cinder::rabbit_use_ssl: {get_input: rabbit_client_use_ssl}
+    cinder::rabbit_port: {get_input: rabbit_client_port}
+    cinder::glance::glance_api_servers: {get_input: glance_api_servers}
+    cinder::backends::enabled_backends: ['bdd']
+    compute_classes:
+    - ::cinder
+    - ::cinder::config
+    - ::cinder::glance
+    - ::cinder::backends
+    - ::cinder::volume
