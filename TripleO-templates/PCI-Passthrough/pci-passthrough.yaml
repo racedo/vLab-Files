@@ -1,6 +1,11 @@
 parameter_defaults:
 
-  # NOTE: should set BOOTPROTO="none" to the ifcfg-NIC file of the PCI-passthrough interfaces, otherwise it slows down start-up. This can be implemented with NodeExtraConfigPost
+  # NOTE: should set BOOTPROTO="none" to the ifcfg-NIC file of the PCI-passthrough interfaces, otherwise it slows down start-up. 
+  # This can be implemented with the network templates, e.g.
+  # - type: interface
+  #   name: ens3
+  #   use_dhcp: false
+  #   defroute: false
 
   # PCI-Passthrough params:
   NeutronNetworkType: "vxlan,vlan"
@@ -11,8 +16,9 @@ parameter_defaults:
     nova::compute::pci_passthrough: |
       "[{\"vendor_id\": \"8086\", \"product_id\": \"100e\", \"physical_network\": \"datacentre\"}]"
 
-   # Example: 
-   # NOTE: It needs to be multi-line to make it become a string with "|". Need testing example below:
+   # NOTE: It needs to be multi-line to make it become a string with "|". 
+   #       Example above works well with 1 line. Need testing example below with multiple interfaces:
+   # 
    #  nova::compute::pci_passthrough: |
    #    [{"devname": "p1p1_1", "physical_network": "datacentre"},
    #     {"devname": "p1p1_2", "physical_network": "datacentre"},
