@@ -1,0 +1,26 @@
+parameter_defaults:
+
+  # NOTE: should set BOOTPROTO="none" to the ifcfg-NIC file of the PCI-passthrough interfaces, otherwise it slows down start-up. This can be implemented with NodeExtraConfigPost
+
+  # PCI-Passthrough params:
+  NeutronNetworkType: "vxlan,vlan"
+  NeutronMechanismDrivers: "openvswitch,sriovnicswitch"
+  NeutronNetworkVLANRange: "datacentre:1:99,physnet1:100:101"
+
+  NovaComputeExtraConfig:
+    nova::compute::pci_passthrough: |
+      "[{\"vendor_id\": \"8086\", \"product_id\": \"100e\", \"physical_network\": \"datacentre\"}]"
+
+   # Example: 
+   # NOTE: It needs to be multi-line to make it become a string with "|". Need testing example below:
+   #  nova::compute::pci_passthrough: |
+   #    [{"devname": "p1p1_1", "physical_network": "datacentre"},
+   #     {"devname": "p1p1_2", "physical_network": "datacentre"},
+   #     {"devname": "p1p1_3", "physical_network": "datacentre"},
+   #     {"devname": "p1p1_4", "physical_network": "datacentre"}]
+
+  controllerExtraConfig:
+    nova::api::pci_alias: |
+      "[{ \"vendor_id\": \"8086\", \"product_id\": \"100e\", \"name\": \"e1000\" }]"
+
+    nova::scheduler::filter::scheduler_default_filters: '[ RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,CoreFilter,PciPassthroughFilter ]'
