@@ -12,7 +12,7 @@ then
   echo "echo 0 > /sys/class/net/ens5f1/device/sriov_numvfs" >> /etc/rc.local
   echo "echo 0 > /sys/class/net/ens5f1/device/sriov_numvfs" >> /etc/rc.local
 
-  grub2-mkconfig -o /boot/grub2/grub.cf
+  grub2-mkconfig -o /boot/grub2/grub.cfg
   cp /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.$(date +%m-%d-%H%M%S).bak
   dracut -f -v
   #reboot
