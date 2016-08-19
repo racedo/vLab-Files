@@ -1,0 +1,9 @@
+# This is needed to allow access to internal network IPs in the overcloud from an instance with access to external network
+# https://access.redhat.com/solutions/53031
+parameter_defaults:
+  controllerExtraConfig:
+    sysctl_settings:
+      net.ipv4.conf.default.rp_filter:
+        value: 2
+      net.ipv4.conf.all.rp_filter:
+        value: 2
