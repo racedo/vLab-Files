@@ -1,0 +1,11 @@
+parameter_defaults:
+
+ controllerExtraConfig:
+   # Disable Sahara
+   sahara::service::enabled: false
+   sahara::service::engine::enabled: false
+   tripleo::loadbalancer::sahara: false
+
+   # After deployment, delete the Sahara endpoint and run this in the controllers:
+   # for i in `systemctl list-units | grep openstack-sahara | awk '{print $1}'`;do systemctl stop $i;done
+   # for i in `systemctl list-units | grep openstack-sahara | awk '{print $1}'`;do systemctl disable $i;done
