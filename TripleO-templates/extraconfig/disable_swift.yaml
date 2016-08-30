@@ -1,0 +1,11 @@
+parameter_defaults:
+
+ controllerExtraConfig:
+
+   # Disable Swift
+   swift::proxy::enabled: false
+   swift::service::enabled: false
+   tripleo::loadbalancer::swift_proxy_server: false
+   # After deployment, delete the Swift endpoint and run this in the controllers:
+   # for i in `systemctl list-units | grep openstack-swift | awk '{print $1}'`;do systemctl stop $i;done
+   # for i in `systemctl list-units | grep openstack-swift | awk '{print $1}'`;do systemctl disable $i;done
