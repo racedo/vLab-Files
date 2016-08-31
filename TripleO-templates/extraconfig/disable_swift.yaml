@@ -1,11 +1,13 @@
 parameter_defaults:
+ # Disables all swift services except openstack-swift-proxy (/usr/share/openstack-tripleo-heat-templates/extraconfig/tasks/pacemaker_common_functions.sh)
+ ControllerEnableSwiftStorage: false
 
  controllerExtraConfig:
-
+  
    # Disable Swift
-   swift::proxy::enabled: false
    swift::service::enabled: false
+   swift::service::service_ensure: "stopped"
    tripleo::loadbalancer::swift_proxy_server: false
-   # After deployment, delete the Swift endpoint and run this in the controllers:
-   # for i in `systemctl list-units | grep openstack-swift | awk '{print $1}'`;do systemctl stop $i;done
-   # for i in `systemctl list-units | grep openstack-swift | awk '{print $1}'`;do systemctl disable $i;done
+   
+   # Stopping and disabling openstack-swift-proxy is still manually done with systemctl
+   # The endpoint needs to be removed manually after the overcloud deployment as there's no clean way to do this via templates
