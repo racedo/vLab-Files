@@ -1,11 +1,7 @@
 parameter_defaults:
 
  controllerExtraConfig:
-   # Disable Sahara
-   sahara::service::enabled: false
-   sahara::service::engine::enabled: false
    tripleo::loadbalancer::sahara: false
-
-   # After deployment, delete the Sahara endpoint and run this in the controllers:
-   # for i in `systemctl list-units | grep openstack-sahara | awk '{print $1}'`;do systemctl stop $i;done
-   # for i in `systemctl list-units | grep openstack-sahara | awk '{print $1}'`;do systemctl disable $i;done
+   # 'pcs resource delete openstack-sahara-api' and 'pcs resource delete openstack-sahara-engine' must be run too as there aren't Puppet or Heat parameters allowing this.
+   # This can be easily integrated in the NodeExtraConfigPost template
+   # We must manually delete the endpoint as there isn't any clean way to do it via TripleO templates in the Mitaka release.
