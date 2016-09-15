@@ -12,6 +12,7 @@ export DIB_LOCAL_IMAGE=rhel-guest-image-7.2-20160302.0.x86_64.qcow2
 ramdisk-image-create --ramdisk-element dracut-ramdisk -o ironic-agent rhel7
 
 RHEL7 + Proliant Tools:
+Apply patch: https://bugs.launchpad.net/diskimage-builder/+bug/1590176
 
 export DIB_YUM_REPO_CONF=/etc/yum.repos.d/rhel-7.3.repo
 export DIB_LOCAL_IMAGE=rhel-guest-image-7.2-20160302.0.x86_64.qcow2
