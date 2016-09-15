@@ -1,5 +1,7 @@
 Full documentation: http://docs.openstack.org/developer/diskimage-builder/
 
+DIB_YUM_REPO_CONF is used to add an extra repository that will be used during the build of the image.
+
 CentOS7:
 
 export DIB_YUM_REPO_CONF=/etc/yum.repos.d/rhel-7.3.repo
