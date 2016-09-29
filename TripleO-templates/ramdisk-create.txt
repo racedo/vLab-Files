@@ -1,4 +1,5 @@
-Full documentation: http://docs.openstack.org/developer/diskimage-builder/
+# Full documentation: http://docs.openstack.org/developer/diskimage-builder/
+# TripleO elements and options used for overcloud: https://github.com/openstack/tripleo-common/blob/master/image-yaml/overcloud-images.yaml
 
 DIB_YUM_REPO_CONF is used to add an extra repository that will be used during the build of the image.
 
