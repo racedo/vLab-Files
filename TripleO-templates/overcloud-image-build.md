@@ -45,7 +45,7 @@ element-names \
 
 ## Examples
 
-### Disk Image Builder Variables used
+### Disk Image Builder variables used
 
 ```DIB_YUM_REPO_CONF```: can be used to add an extra repository during the image build.
 
