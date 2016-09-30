@@ -9,7 +9,7 @@ https://github.com/openstack/tripleo-common/blob/master/image-yaml/overcloud-ima
 
 
 ## Modify base image if necessary
-During the image build packages are installed so the image needs to be subscribed. Extra packages are installed as an example only.
+Subscribe the image so that packages can be installed. Optionally, you can add packages during this process.
 ```
 virt-customize -a /tmp/rhel-guest-image-7.2-20160302.0.x86_64.qcow2 \
 --run-command \
@@ -22,7 +22,30 @@ yum -q -y install grub2-efi grub2-efi-modules'
 
 **Note: Alternatively the element ```rhel-common``` should allow us to register/unregister the image during its build.
 
-## Variables used
+## Installing packages in the initramfs image
+
+Edit ```/usr/share/diskimage-builder/elements/redhat-common/package-installs.yaml```
+
+Add a line with the package name and colon: ```package-name:```
+
+## Installing packages in the Overcloud image
+
+Just add the package to ```-p```. For example:
+
+```
+disk-image-create \
+-o overcloud-full -u \
+element-names \
+-p package-name1,package-name2
+```
+
+## Exploring the contents of an initramfs file
+
+```/usr/lib/dracut/skipcpio ironic-python-agent.initramfs |gunzip -c|cpio -i -d```
+
+## Examples
+
+### Disk Image Builder Variables used
 
 ```DIB_YUM_REPO_CONF```: can be used to add an extra repository during the image build.
 
@@ -30,19 +53,8 @@ yum -q -y install grub2-efi grub2-efi-modules'
 
 ```DIB_LOCAL_IMAGE```: local qcow2 base RHEL image
 
-## Installing packages in the image
+```DIB_HPSSACLI_URL```: URL of the Proliant Tools (as described in the proliant-tools DIB element documentation)
 
-As an example, I'm installing ``grub2-efi-modules`` in the ramdisk image.
-
-Edit ```/usr/share/diskimage-builder/elements/redhat-common/package-installs.yaml```
-
-Add the package like this: ```grub2-efi-modules:```
-
-## Exploring the contents of an initramfs file
-
-```/usr/lib/dracut/skipcpio ironic-python-agent.initramfs |gunzip -c|cpio -i -d```
-
-## Examples
 ### Overcloud RHEL 7 ramdisk and kernel only
 
 ```
@@ -53,6 +65,8 @@ disk-image-create -o ironic-python-agent -u ironic-agent dynamic-login element-m
 
 ### Overcloud full image RHEL 7 
 ```
+export DIB_LOCAL_IMAGE=/tmp/rhel-guest-image-7.2-20160302.0.x86_64.qcow2
+export ELEMENTS_PATH=/usr/share/tripleo-image-elements
 disk-image-create \
 -o overcloud-full -u \
 hosts baremetal dhcp-all-interfaces os-collect-config os-net-config stable-interface-names grub2 element-manifest network-gateway dynamic-login enable-packages-install rhel7 \
