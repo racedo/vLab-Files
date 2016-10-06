@@ -27,7 +27,6 @@ parameters:
     description: The location of the image
     type: string
     default: http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
-
   PublicNetworkName:
     type: string
     default: public
@@ -44,6 +43,10 @@ parameters:
   ExternalNetVlan:
     description: segmentation ID
     type: string
+  DnsServers:
+    description: DNS servers
+    type: comma_delimited_list
+    default: ["8.8.8.8"]
 
 resources:
 
@@ -57,6 +60,7 @@ resources:
         properties:
           network_id: { get_resource: private_net }
           cidr: 172.16.2.0/24
+          dns_nameservers: { get_param: DnsServers }
 
   public_net:
         type: OS::Neutron::ProviderNet
