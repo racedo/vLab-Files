@@ -1,0 +1,146 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Provision a base OS instance with Overcloud defaults
+
+parameters:
+  Key:
+    description: Name of an existing SSH keypair to inject into the instance
+    type: string
+    default: admin
+    constraints:
+      - length: { min: 1, max: 255 }
+        description: Key name must be between 1 and 255 characters
+      - allowed_pattern: "[\\x20-\\x7E]*"
+        description: Key name can contain only ASCII characters
+  Flavor:
+    description: The flavor required for the instance
+    type: string
+    default: "m1.small"
+    constraints:
+      - allowed_values: [m1.tiny, m1.small, m1.medium, m1.large, m1.xlarge]
+  ImageName:
+    description: The name of a template to deploy
+    type: string
+    default: "cirros"
+  ImageLocation:
+    description: The location of the image
+    type: string
+    default: http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+
+  PublicNetworkName:
+    type: string
+    default: public
+    description: Public network name
+  PublicGatewayIp:
+    description: Public gateway IP
+    type: string
+  PublicIpStart:
+    description: First IP of the public network range
+    type: string
+  PublicIpEnd:
+    description: Last IP of the public network range
+    type: string
+  ExternalNetVlan:
+    description: segmentation ID
+    type: string
+
+resources:
+
+  private_net:
+        type: OS::Neutron::Net
+        properties:
+          name: private-net
+
+  private_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+          network_id: { get_resource: private_net }
+          cidr: 172.16.2.0/24
+
+  public_net:
+        type: OS::Neutron::ProviderNet
+        properties:
+          name: { get_param: PublicNetworkName }
+          network_type: vlan
+          physical_network: datacentre
+          segmentation_id: { get_param: ExternalNetVlan }
+          router_external: true
+
+  public_subnet:
+        type: OS::Neutron::Subnet
+        properties:
+          network_id: { get_resource: public_net }
+          cidr: 10.0.0.0/24
+          gateway_ip: { get_param: PublicGatewayIp }
+          allocation_pools:
+            - start: { get_param: PublicIpStart }
+              end: { get_param: PublicIpEnd }
+
+  router1:
+        type: OS::Neutron::Router
+        properties:
+          external_gateway_info:
+                network: { get_resource: public_net }
+
+  router1_interface:
+        type: OS::Neutron::RouterInterface
+        properties:
+          router_id: { get_resource: router1 }
+          subnet_id: { get_resource: private_subnet }
+
+  security_group:
+        type: OS::Neutron::SecurityGroup
+        properties:
+          name: admin_security_group
+          rules:
+            - remote_ip_prefix: 0.0.0.0/0
+              protocol: tcp
+              port_range_min: 22
+              port_range_max: 22
+            - remote_ip_prefix: 0.0.0.0/0
+              protocol: icmp
+
+  image:
+        type: OS::Glance::Image
+        properties:
+          container_format: bare
+          disk_format: qcow2
+          is_public: true
+          location: { get_param: ImageLocation }
+          name: { get_param: ImageName }
+
+
+  instance0:
+    type: OS::Nova::Server
+    properties:
+      flavor: { get_param: Flavor }
+      image: { get_resource: image }
+      key_name: { get_param: Key }
+      networks:
+        - port: { get_resource: instance0_port0 }
+
+  instance0_port0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+      security_groups:
+        - default
+        - { get_resource: security_group }
+
+  instance0_public:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_resource: public_net }
+      port_id: { get_resource: instance0_port0 }
+
+outputs:
+  # Output our fixed and floating IPs - This will be shown in 'heat stack-show'
+  instance0_private_ip:
+    description: IP address of instance0 in private network
+    value: { get_attr: [ instance0, first_address ] }
+  instance0_public_ip:
+    description: Floating IP address of instance0 in public network
+    value: { get_attr: [ instance0_public, floating_ip_address ] }
