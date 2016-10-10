@@ -40,6 +40,9 @@ parameters:
   PublicIpEnd:
     description: Last IP of the public network range
     type: string
+  PublicCidr:
+    type: string
+    description: Public network CIDR
   ExternalNetVlan:
     description: segmentation ID
     type: string
@@ -75,7 +78,7 @@ resources:
         type: OS::Neutron::Subnet
         properties:
           network_id: { get_resource: public_net }
-          cidr: 10.0.0.0/24
+          cidr: { get_param: PublicCidr }
           gateway_ip: { get_param: PublicGatewayIp }
           allocation_pools:
             - start: { get_param: PublicIpStart }
