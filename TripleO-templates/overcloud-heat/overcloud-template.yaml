@@ -140,6 +140,7 @@ resources:
 
   instance0_public:
     type: OS::Neutron::FloatingIP
+    depends_on: router1_interface
     properties:
       floating_network: { get_resource: public_net }
       port_id: { get_resource: instance0_port0 }
