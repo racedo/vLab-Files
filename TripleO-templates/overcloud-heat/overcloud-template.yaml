@@ -79,6 +79,7 @@ resources:
         properties:
           network_id: { get_resource: public_net }
           cidr: { get_param: PublicCidr }
+          enable_dhcp: false
           gateway_ip: { get_param: PublicGatewayIp }
           allocation_pools:
             - start: { get_param: PublicIpStart }
