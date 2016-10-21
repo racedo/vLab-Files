@@ -1,5 +1,7 @@
 parameter_defaults:
-  # Create key before: openstack keypair create admin > ~/admin-ssh-key ; chmod 600 ~/admin-ssh-key
+  # Create key and a flavor before, e.g:
+  # openstack keypair create admin > ~/admin-ssh-key ; chmod 600 ~/admin-ssh-key
+  # openstack flavor create --disk 20 m1.small
   Key: admin
   Flavor: m1.small
   ImageName: cirros
