@@ -203,7 +203,7 @@ $ openstack baremetal driver list
 | pxe_ssh             | overcloud-controller-0.localdomain, overcloud-controller-1.localdomain, overcloud-controller-2.localdomain |
 +---------------------+------------------------------------------------------------------------------------------------------------+
 ```
-####Baremtal network
+####Baremetal network
 This network will be:
 * The provisioning network for the Overcloud’s Ironic.
 * The cleaning network for wiping the baremetal node’s disks
