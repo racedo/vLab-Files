@@ -1,10 +1,10 @@
-#Deploying Ironic in the Overcloud
-###Introduction
+# Deploying Ironic in the Overcloud
+### Introduction
 This document describes the process to enable Ironic in the Overcloud in a multi-controller deployment with RH OSP 10 Newton.
 
 The process should work with any working RH OSP 10 deployment or even an already deployed environment updated with the configuration templates described here.
 
-###Architecture Setup
+### Architecture Setup
 With this setup we can have both, virtual instances and instances deployed on baremetal nodes and reachabe via network between them. In this example I’m using floating IPs with VMs and the provisioning network with the baremetal nodes. 
 
 To be able to test this setup in a lab with virtual machines, we use Libvirt+KVM using VMs for all the nodes in a all-in-one lab. The network topology is described in the diagram below.
@@ -14,9 +14,9 @@ Ideally we’d have more networks, for example a dedicated network for cleaning 
 * Provisioning from the Overcloud
 * Cleaning the baremetal nodes’ disks 
 * Baremetal tenant network for the Overcloud nodes
-![OVS Libvirt VLANs](IronicintheOvercloud.png)
+![OVS Libvirt VLANs](images/ironic-overcloud.png)
 
-###Virtual environment configuration
+### Virtual environment configuration
 In order to be able to test with `root_device` hints in the nodes (Libvirt VMs) that we want to test as baremetal nodes we define the first disk in Libvirt with a iSCSI bus and a _wwn ID_:
 ```
 <disk type='file' device='disk'>
@@ -76,9 +76,9 @@ $ openstack baremetal introspection data save 7740e442-96a6-496c-9bb2-7cac89b6a8
   }
 ]
 ```
-###Undercloud templates
+### Undercloud templates
 The following templates contain all the changes needed to configure Ironic and to adapt the NIC config to have a dedicated OVS bridge for Ironic as required.
-####Ironic configuration
+#### Ironic configuration
 `~/templates/ironic.yaml`
 
 ```
@@ -97,9 +97,9 @@ parameter_defaults:
     IronicCleaningDiskErase: metadata
     IronicIPXEEnabled: true
     ControllerExtraConfig:
-        ironic::drivers::ssh::libvirt_uri: 'qemu:///system
+        ironic::drivers::ssh::libvirt_uri: 'qemu:///system'
 ```
-####Network configuration
+#### Network configuration
 First we map an extra bridge called `br-baremetal` which will be used by Ironic:
 
 `~/templates/network-environment.yaml`:
@@ -142,7 +142,7 @@ It is important to mention that this Ironic network used for provisioning can’
                   next_hop: {get_param: EC2MetadataIp}
 [...]
 ```
-####Deployment
+#### Deployment
 This is the deployment script I’ve used. Note there’s a even a composable role for the Ops Tools as well as Ceph but those are irrelevant for the purpose of this document.
 
 
@@ -171,8 +171,8 @@ openstack overcloud deploy \
 --timeout 60 \
 --libvirt-type kvm
 ```
-###Post deployment configuration
-####Verifications
+### Post deployment configuration
+#### Verifications
 After the deployment completes successfully we should see how the controllers have the compute service enabled:
 ```
 $ openstack compute service list -c Binary -c Host -c Status
@@ -203,7 +203,7 @@ $ openstack baremetal driver list
 | pxe_ssh             | overcloud-controller-0.localdomain, overcloud-controller-1.localdomain, overcloud-controller-2.localdomain |
 +---------------------+------------------------------------------------------------------------------------------------------------+
 ```
-####Baremetal network
+#### Baremetal network
 This network will be:
 * The provisioning network for the Overcloud’s Ironic.
 * The cleaning network for wiping the baremetal node’s disks
@@ -243,7 +243,7 @@ parameter_defaults:
     ControllerExtraConfig:
         Ironic::conductor::cleaning_network_uuid: f7af39df-2576-4042-87c0-14c395ca19b4
 ```
-####Deployment images
+#### Deployment images
 We can use the same deployment images we use in the Undercloud:
 ```
 $ openstack image create --public --container-format aki --disk-format aki --file ~/images/ironic-python-agent.kernel deploy-kernel
@@ -251,7 +251,7 @@ $ openstack image create --public --container-format ari --disk-format ari --fil
 ```
 We could also create them using the [CoreOS images](http://docs.openstack.org/project-install-guide/baremetal/draft/deploy-ramdisk.html#deploy-ramdisk). For example, if we wanted to troubleshoot the deployment we could use the CoreOS images and enable debug output in the Ironic Python Agent or adding our ssh-key to access during the deployment of the image.
 
-####Instance images
+#### Instance images
 Again, for simplicity, we can use the _overcloud-full_ image we use in the Undercloud:
 ```
 $ KERNEL_ID=$(openstack image create --file ~/images/overcloud-full.vmlinuz --public --container-format aki --disk-format aki -f value -c id overcloud-full.vmlinuz)
@@ -263,7 +263,7 @@ Note that it uses a _kernel_ and a _ramdisk_ image. If we don’t add them, when
 ERROR ironic.drivers.modules.agent_base_vendor Command: sudo ironic-rootwrap /etc/ironic/rootwrap.conf parted -a optimal -s -- /dev/disk/by-path/ip-192.168.3.162:3260-iscsi-iqn.2008-10.org.openstack:9699b9d3-f385-4b3a-abf6-0d0f97bcc1eb-lun-1 mkpart primary ext2 -64MiB -0
 ERROR ironic.drivers.modules.agent_base_vendor Stderr: u'/sbin/parted: invalid token: primary\nError: Expecting a file system type.\n'
 ```
-####Create flavors
+#### Create flavors
 We create two flavors to start with, one for the baremetal provisioning and another one for the virtual instances. 
 
 Then, we create a property called _baremetal_ which will also be created in the host aggregates to differentiate baremetal from virtual instances. 
@@ -276,7 +276,7 @@ $ openstack flavor set baremetal --property capabilities:boot_option="local"
 $ openstack flavor create --disk 20 m1.small
 $ openstack flavor set m1.small --property baremetal=false
 ```
-####Create host aggregates
+#### Create host aggregates
 To have OpenStack differentiating between baremetal and virtual instances we can create _host aggregates_ to have the _nova-compute_ service running on the controllers just for Ironic and the the one on compute nodes for virtual instances:
 ```
 $ openstack aggregate create --property baremetal=true baremetal-hosts
@@ -286,7 +286,7 @@ $ openstack aggregate add host baremetal-hosts overcloud-controller-0.localdomai
 $ openstack aggregate add host baremetal-hosts overcloud-controller-1.localdomain
 $ openstack aggregate add host baremetal-hosts overcloud-controller-2.localdomain
 ```
-####Register the nodes in Ironic
+#### Register the nodes in Ironic
 The nodes can be registered using `openstack baremetal create` and a _YAML_ template. In this example I register only one node named _overcloud-2-node4_, which I had previously registered in the Undercloud for introspection (and later deleted from it or set to _maintenance mode_ to avoid conflicts between the two Ironic services).
 
 
@@ -379,7 +379,7 @@ Wait until the cleaning process has finished and then set the boot_option to loc
 $ openstack baremetal node set $(openstack baremetal node show overcloud-2-node4 -f value -c uuid) --property 'capabilities=boot_option:local'
 ```
 
-####Start a baremetal instance
+#### Start a baremetal instance
 Just as in the virtual instances we’ll use a _ssh key_ and then we’ll start the instance with Ironic:
 ```
 $ openstack keypair create --public-key ~/.ssh/id_rsa.pub stack-key
