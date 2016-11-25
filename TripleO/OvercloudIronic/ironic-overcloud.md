@@ -266,9 +266,7 @@ ERROR ironic.drivers.modules.agent_base_vendor Stderr: u'/sbin/parted: invalid t
 ####Create flavors
 We create two flavors to start with, one for the baremetal provisioning and another one for the virtual instances. 
 
-
 Then, we create a property called _baremetal_ which will also be created in the host aggregates to differentiate baremetal from virtual instances. 
-
 
 As by default the `boot_option` is `netboot`, we set it to `local` and we will do the same when we create the baremetal node (note that this is optional and we could use netboot):
 ```
@@ -287,7 +285,6 @@ $ for compute in $(openstack hypervisor list -f value -c "Hypervisor Hostname" |
 $ openstack aggregate add host baremetal-hosts overcloud-controller-0.localdomain
 $ openstack aggregate add host baremetal-hosts overcloud-controller-1.localdomain
 $ openstack aggregate add host baremetal-hosts overcloud-controller-2.localdomain
-
 ```
 ####Register the nodes in Ironic
 The nodes can be registered using `openstack baremetal create` and a _YAML_ template. In this example I register only one node named _overcloud-2-node4_, which I had previously registered in the Undercloud for introspection (and later deleted from it or set to _maintenance mode_ to avoid conflicts between the two Ironic services).
