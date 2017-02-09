@@ -33,6 +33,10 @@ parameter_defaults:
   # The vendor_id and product_id come from the output of 'lspci -nn' in the compute nodes (careful: https://bugs.launchpad.net/nova/+bug/1513513)
     nova::api::pci_alias: |
       "{ \"vendor_id\": \"8086\", \"product_id\": \"10ed\", \"name\": \"PT\" }"
+  # Or alternatively, if YAML becomes problematic:
+  #  nova::api::pci_alias: |
+  #    "[{\"vendor_id\":\"8086\",\"product_id\":\"10ed\",\"name\":\"PT\"}]"
+
     nova::scheduler::filter::scheduler_default_filters: '[ RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,CoreFilter,PciPassthroughFilter ]'
 
   # Note: for SR-IOV we still need to set supported_pci_vendor_devs in /etc/neutron/plugins/ml2/ml2_conf_sriov.ini
