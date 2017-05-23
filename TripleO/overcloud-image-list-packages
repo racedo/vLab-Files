@@ -1,0 +1,5 @@
+export LIBGUESTFS_BACKEND=direct
+yum install libguestfs-tools-c
+virt-customize -a overcloud-full.qcow2 --run-command "rpm -qa | sort >
+/root/overcloud-full-rpm.manifest"
+virt-copy-out -a overcloud-full.qcow2 /root/overcloud-full-rpm.manifest
