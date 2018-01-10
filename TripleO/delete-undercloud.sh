@@ -5,3 +5,5 @@ rm -rf \
 /var/lib/rabbitmq/ /var/lib/glance /var/lib/haproxy /var/lib/heat* /var/lib/ironic* /var/lib/mongodb /var/lib/mysql /var/lib/neutron /var/lib/nova /var/lib/rabbitmq /var/lib/swift \
 /etc/glance /etc/haproxy /etc/heat /etc/httpd /etc/ironic-inspector /etc/mistral /etc/neutron /etc/nova /etc/rabbitmq /etc/swift /etc/tempest /etc/zaqar /httpboot /tftpboot /srv/node /etc/xinetd.d/rsync \
 /home/stack/stackrc /root/stackrc /home/stack/undercloud-passwords.conf
+
+# Remember to unconfigure ifcfg-br-ctlplane
